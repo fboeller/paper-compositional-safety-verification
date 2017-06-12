@@ -5,6 +5,8 @@
 
 \usepackage{amssymb}
 \usepackage{amsmath}
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
 
 \title{Compositional Safety Verification with Max-SMT}
 \author{Fabian B\"{o}ller}
@@ -141,8 +143,60 @@ A soft constraints does not have to be satisfied, but the solver will try to max
 
 \subsubsection{CheckSafe}
 
+\begin{algorithm}
+\caption{CheckSafe}\label{checksafe}
+\begin{algorithmic}[1]
+\State $\mathcal{P} \gets \text{program}$
+\State $\mathcal{C} \gets \text{strongly connected component}$
+\State $\mathcal{E}_\mathcal{C} \gets \text{entry transitions of } \mathcal{C}$
+\State $(t_\text{exit}, \varphi) \gets \text{assertion with exit transition } t_\text{exit} \text{ and clause } \varphi$
+\State $(\ell_\text{exit}, \tau_\text{exit}, \ell'_\text{exit}) \gets t_\text{exit}$
+\If {$\tau_\text{exit} \Rightarrow \varphi'$}
+  \Return Safe
+\ElsIf {$\ell_\text{exit} = \ell_0$}
+  \Return Maybe
+\EndIf
+\State $\mathcal{Q} \rightarrow \text{CondSafe}(\mathcal{C}, \mathcal{E}_\mathcal{C}, (t_\text{exit}, \varphi))$
+\If {$\mathcal{Q} = \text{None}$}
+  \Return Maybe
+\EndIf
+\ForAll {$t = (\ell, \tau, \ell') \in \mathcal{E}_\mathcal{C}, \mathcal{L} \in \mathcal{Q}(\ell')$}
+  \State $\tilde{\mathcal{C}} \gets \text{component}(\ell, \mathcal{P})$
+  \State $\mathcal{E}_{\tilde{\mathcal{C}}} \gets \text{entries}(\tilde{\mathcal{C}}, \mathcal{P})$
+  \State $\text{res}[t, \mathcal{L}] \gets \text{CheckSafe}(\mathcal{P}, \tilde{\mathcal{C}}, \mathcal{E}_{\tilde{\mathcal{C}}}, (t, \mathcal{L}))$
+\EndFor
+\If {$\forall t = (\ell, \tau, \ell') \in \mathcal{E}_\mathcal{C}, \mathcal{L} \in \mathcal{Q}(\ell'): \text{res}[t, \mathcal{L}] = \text{Safe}$}
+  \Return Safe
+\Else
+  \State $\tilde{\mathcal{E}}_{\tilde{\mathcal{C}}} \gets \lbrace (\ell, \tau \wedge \neg (\bigwedge_{\mathcal{L} \in \mathcal{Q}(\ell') \wedge \text{res}[t, \mathcal{L}]=\text{Maybe}}{\mathcal{L}'}), \ell') \mid t = (\ell, \tau, \ell') \in \mathcal{E}_\mathcal{C} \rbrace$
+  \State $\tilde{\mathcal{C}} \gets \lbrace (\ell, \tau \wedge \neg\mathcal{Q}(\ell')' \wedge \neg\mathcal{Q}(\ell), \ell') \mid (\ell, \tau, \ell') \in \mathcal{C} \rbrace$
+\EndIf
+\Return $\text{CheckSafe}(\mathcal{P}, \tilde{\mathcal{C}}, \tilde{\mathcal{E}}_{\tilde{\mathcal{C}}}, (t_\text{exit}, \varphi))$
+\end{algorithmic}
+\end{algorithm}
+
 \subsubsection{CondSafe}
 
-At this point I will link the presented example to the algorithm code and give the definition of the algorithms.
+\begin{algorithm}
+\caption{CondSafe}\label{condsafe}
+\begin{algorithmic}[1]
+\State $\mathcal{C} \gets \text{strongly connected component}$
+\State $\mathcal{E}_\mathcal{C} \gets \text{entry transitions of } \mathcal{C}$
+\State $(t_\text{exit}, \varphi) \gets \text{assertion with exit transition } t_\text{exit} \text{ and clause } \varphi$
+\State $k \gets 1$
+\Repeat
+  \State construct formula $\mathbb{F}_k$ from $\mathcal{C}$, $\mathcal{E}_\mathcal{C}$ and $t_\text{exit}, \varphi$
+  \State $\sigma \gets \text{MAX-SMT-Solver}(\mathbb{F}_k)$
+  \If {$\sigma$ is a model}
+    \State $\mathcal{Q} \gets \lbrace \ell \rightarrow \sigma(I_{\ell, k}) \mid \ell \in \mathcal{C} \rbrace$
+    \Return $\mathcal{Q}$
+  \EndIf
+  \State $k \gets k + 1$
+\Until{$k > \text{MAX\_CONJUNCTS}$}
+\Return None
+\end{algorithmic}
+\end{algorithm}
+
+// TODO At this point I will link the presented example to the algorithm code and give the definition of the algorithms.
 
 \end{document}
