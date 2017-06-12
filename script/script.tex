@@ -141,6 +141,17 @@ For both solvers there exist extensions called Max-SAT and Max-SMT.
 Those extensions provide the possibility to declare constraints as soft with a weight.
 A soft constraints does not have to be satisfied, but the solver will try to maximize the sum of the weights of the soft constraints.
 
+Formally a Max-SMT problem is a formula $H_1 \wedge \dots \wedge H_n \wedge [S_1,\omega_1] \wedge \dots \wedge [S_m,\omega_m]$, where $H_i$ denote the hard clauses, which also occur in an SMT problem, and $[S_i,\omega_i]$ denote the soft clauses and their weight.
+
+To find conditional inductive invariants for program parts we create hard constraints for the consecution and safety conditions and a soft constraint for the initiation condition.
+While the consecution condition ensures that the invariant is inductive and the safety condition ensures the assertion is implied, the initiation condition does not need to be fulfiled and thus the resulting invariant might depend on additional preconditions.  
+
+In the definition of the condition we use the template \[ I_{\ell,k}(\mathcal{V}) \equiv \bigwedge_{1 \leq j \leq k}{I_{\ell,j,k}(\mathcal{V})} \] which is a conjunction of $k$ linear inequations \[ I_{\ell,j,k}(\mathcal{V}) \equiv i_{\ell,j} + \sum_{v \in \mathcal{V}}{i_{\ell,j,v} * v} \leq 0 \]. We write $I'_{\ell,k}$ instead of $I_{\ell,k}$ if we use variables $i'_{l,j}$ and $i'_{l,j,v}$ instead of $i_{l,j}$ and $i_{l,j,v}$.
+With those definitions we define the initiation condition for a transition $t = (\ell, \tau, \ell') \in \mathcal{E}_\mathcal{C}$ and numbers $j, k \in \mathbb{N}$ with $1 \leq j \leq k$ as \[ \mathbb{I}_{t,j,k} \equiv \tau \Rightarrow I'_{l',j,k} \]. For each transition $t = (\ell, \tau, \ell') \in \mathcal{C}$ and number $k \in \mathbb{N}$ we define the consecution condition as \[ \mathbb{C}_{t,k} \equiv I_{\ell,k} \wedge \tau \Rightarrow I'_{\ell,k} \]. The safety condition we define for an exit transition $t_\text{exit} = (\tilde{\ell}_\text{exit}, \tau_\text{exit}, \ell_\text{exit})$ as \[ \mathbb{S}_k \equiv I_{\tilde{\ell}_\text{exit},k} \wedge \tau_\text{exit} \Rightarrow \varphi' \].
+
+Those templates for the three different conditions we can put together in a Max-SMT problem:
+\[ \mathbb{F}_k \equiv \bigwedge_{t \in \mathcal{C}} \mathbb{C}_{t, k} \wedge \bigwedge_{t \in \mathcal{E}_\mathcal{C}, 1 \leq j \leq k}{(\mathbb{I}_{t,j,k} \vee \neg p_{\mathbb{I}_{t,j,k}})} \wedge \mathbb{S}_k \wedge \bigwedge_{t \in \mathcal{E}_\mathcal{C}, 1 \leq j \leq k}{[p_{\mathbb{I}_{t,j,k}}, \omega_\mathbb{I}]} \]
+
 \subsubsection{CheckSafe}
 
 \begin{algorithm}
