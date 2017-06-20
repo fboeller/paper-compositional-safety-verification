@@ -22,6 +22,9 @@
 \usepackage{algorithm}
 \usepackage[noend]{algpseudocode}
 
+\let\oldReturn\Return
+\renewcommand{\Return}{\State\oldReturn}
+
 \usepackage[pdfpagelabels=true,linktocpage]{hyperref}
 
 \usepackage{tikz}

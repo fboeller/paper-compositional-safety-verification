@@ -37,39 +37,33 @@ Since the postcondition is implied by the exit transition, the SCC $C_0$ is safe
 The exit transition of $C_1$ is $t_4$.
 We need to find a precondition on the entry transition $t_1$ such that the postcondition $y > x$ is implied.
 
-\todo{Either go on with $C_1$ or change it first}
+\todo{Change $C_1$ first, then describe}
 
 \begin{algorithm}
 \caption{CheckSafe}\label{checksafe}
 \begin{algorithmic}[1]
-\State $\mathcal{P} \gets \text{program}$
-\State $\mathcal{C} \gets \text{strongly connected component}$
-\State $\mathcal{E}_\mathcal{C} \gets \text{entry transitions of } \mathcal{C}$
-\State $(t_\text{exit}, \varphi) \gets \text{assertion with exit transition } t_\text{exit} \text{ and clause } \varphi$
-\State $(\ell_\text{exit}, \tau_\text{exit}, \ell'_\text{exit}) \gets t_\text{exit}$
-\If {$\tau_\text{exit} \Rightarrow \varphi'$}
-  \Return Safe
-\ElsIf {$\ell_\text{exit} = \ell_0$}
-  \Return Maybe
-\EndIf
-\State $\mathcal{Q} \rightarrow \text{CondSafe}(\mathcal{C}, \mathcal{E}_\mathcal{C}, (t_\text{exit}, \varphi))$
-\If {$\mathcal{Q} = \text{None}$}
-  \Return Maybe
-\EndIf
-\ForAll {$t = (\ell, \tau, \ell') \in \mathcal{E}_\mathcal{C}, \mathcal{L} \in \mathcal{Q}(\ell')$}
-  \State $\tilde{\mathcal{C}} \gets \text{component}(\ell, \mathcal{P})$
-  \State $\mathcal{E}_{\tilde{\mathcal{C}}} \gets \text{entries}(\tilde{\mathcal{C}}, \mathcal{P})$
-  \State $\text{res}[t, \mathcal{L}] \gets \text{CheckSafe}(\mathcal{P}, \tilde{\mathcal{C}}, \mathcal{E}_{\tilde{\mathcal{C}}}, (t, \mathcal{L}))$
-\EndFor
-\If {$\forall t = (\ell, \tau, \ell') \in \mathcal{E}_\mathcal{C}, \mathcal{L} \in \mathcal{Q}(\ell'): \text{res}[t, \mathcal{L}] = \text{Safe}$}
-  \Return Safe
-\Else
-  \State $\tilde{\mathcal{E}}_{\tilde{\mathcal{C}}} \gets \lbrace (\ell, \tau \wedge \neg (\bigwedge_{\mathcal{L} \in \mathcal{Q}(\ell') \wedge \text{res}[t, \mathcal{L}]=\text{Maybe}}{\mathcal{L}'}), \ell') \mid t = (\ell, \tau, \ell') \in \mathcal{E}_\mathcal{C} \rbrace$
-  \State $\tilde{\mathcal{C}} \gets \lbrace (\ell, \tau \wedge \neg\mathcal{Q}(\ell')' \wedge \neg\mathcal{Q}(\ell), \ell') \mid (\ell, \tau, \ell') \in \mathcal{C} \rbrace$
-\EndIf
-\Return $\text{CheckSafe}(\mathcal{P}, \tilde{\mathcal{C}}, \tilde{\mathcal{E}}_{\tilde{\mathcal{C}}}, (t_\text{exit}, \varphi))$
+  \State Input: The program, an SCC, the entry transitions of the SCC, an exit transition with an assertion
+  \If {the exit transition already implies the assertion}
+    \Return Safe
+  \ElsIf {the exit transition is an initial transition}
+    \Return Maybe
+  \EndIf
+  \State Call CondSafe for the SCC with the given assertion
+  \If {no CII could be found}
+    \Return Maybe
+  \EndIf
+  \ForAll {entry SCCs}
+    \ForAll {literals of the according condition of the CII}
+      \State Call CheckSafe for the entry SCC and with the literal as assertion
+    \EndFor
+  \EndFor
+  \If {all calls returned Safe}
+    \Return Safe
+  \EndIf
+  \Return the result of a call to CheckSafe with a narrowed version
 \end{algorithmic}
 \end{algorithm}
+
 
 \subsection{Narrowing}
 
@@ -122,6 +116,16 @@ For the example it is sufficient to explore the one of the leafes with $t_4$ in 
 The algorithm first detects $x < y$ as precondition of $l_2$, which we can not prove safe for neither of the two paths.
 Therefore the other two paths both must ensure safety.
 The number of possible narrowing steps at $l_2$ is two in this example, but in more complex programs there can be an arbitrary number of narrowing steps necessary at a SCC.
+
+\begin{algorithm}
+\caption{Narrowing}\label{narrowing}
+\begin{algorithmic}[1]
+  \State $\tilde{\mathcal{E}}_{\tilde{\mathcal{C}}} \gets \lbrace (\ell, \tau \wedge \neg (\bigwedge_{\mathcal{L} \in \mathcal{Q}(\ell') \wedge \text{res}[t, \mathcal{L}]=\text{Maybe}}{\mathcal{L}'}), \ell') \mid t = (\ell, \tau, \ell') \in \mathcal{E}_\mathcal{C} \rbrace$
+  \State $\tilde{\mathcal{C}} \gets \lbrace (\ell, \tau \wedge \neg\mathcal{Q}(\ell')' \wedge \neg\mathcal{Q}(\ell), \ell') \mid (\ell, \tau, \ell') \in \mathcal{C} \rbrace$
+  \Return $(\tilde{\mathcal{E}}_{\tilde{\mathcal{C}}}, \tilde{\mathcal{C}})$
+\end{algorithmic}
+\end{algorithm}
+
 
 \begin{figure}
 \centering
