@@ -1,7 +1,8 @@
 *~
 outline/outline.pdf
 summary/summary.pdf
-script/script.aux
-script/script.log
-script/script.md
-script/script.pdf
+script/main.aux
+script/main.log
+script/main.pdf
+script/main.out
+VeryMax

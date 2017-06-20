@@ -1,0 +1,79 @@
+\section{Preliminaries}
+\label{sec:preliminaries}
+
+After the informal introduction of the example program in the last chapter, this chapter will introduce formal definitions.
+In the first part there will be presented a formal definition of program graphs.
+In the second part different types of invariants, which are necessary for the analysis, will be introduced.
+
+\subsection{Program}
+
+We define $\mathcal{L} = \lbrace \ell_0, \dots, \ell_n \rbrace$ as the set of program locations, where $\ell_0$ denotes the unique start location of a program.
+The example program uses the location set $\mathcal{L} = \lbrace \ell_0 , \ell_1 , \ell_2 \rbrace$ and $\ell_0$ is its start location.
+
+We define $\mathcal{V} = \lbrace v_1, \dots, v_n \rbrace$ as the set of variables which occur in a program.
+We define $\mathcal{V}' = \lbrace v'_1, \dots, v'_n \rbrace$ as annotated variables to distinguish between previous and later values.
+In the example program there occur the variables $x$, $y$ and $i$.
+Their annotated versions are $x'$, $y'$ and $i'$.
+
+An evaluation $\upsilon: \mathcal{V} \rightarrow \mathbb{Z}$ assigns each program variable an integer value.
+A state $s = (\ell, \upsilon)$ represents the values of variables at a certain location $\ell \in \mathcal{L}$.
+A valid starting state in the example program could be for instance $(\ell_0, \upsilon_{[x \rightarrow 1, y \rightarrow 1, i \rightarrow 0]})$
+
+We denote with $\mathcal{F}(\mathcal{V})$ the set of formulas consisting of conjunctions of linear inequalities over the variables $\mathcal{V}$.
+We define a program as a directed graph consisting of the program locations $\mathcal{L}$ and a set of transitions $\mathcal{T} = \lbrace (\ell, \tau, \ell') \mid \ell, \ell' \in \mathcal{L}, \tau \in \mathcal{F}(\mathcal{V} \cup \mathcal{V}') \rbrace$ between those locations.
+If for a variable $v$ no assignment $v' = \dots$ is given, we assume the trivial assignment $v' = v$.
+The example program consists of seven transitions. The formal representation of $t_3$ is for instance $(\ell_1,i<x \wedge y'=y+1 \wedge i'=i \wedge x'=x,\ell_1)$.
+
+An evaluation step with a transition $(\ell, \tau, \ell') \in \mathcal{T}$ leads a program state $(\ell, \upsilon)$ to another program state $(\ell', \upsilon')$ if and only if $\upsilon \models \tau$ and $\upsilon' \models \tau$. We then write $(\ell, \upsilon) \rightarrow_t (\ell', \upsilon')$.
+For instance $(\ell_1,\upsilon_{[i \rightarrow 5, x \rightarrow 2, y \rightarrow 1]}) \rightarrow_{t_4} (\ell_2,\upsilon_{[i \rightarrow 5, x \rightarrow 2, y \rightarrow 1]})$ is a valid evaluation step in the program, while $(\ell_1,\upsilon_{[i \rightarrow 1, x \rightarrow 2, y \rightarrow 1]}) \rightarrow_{t_4} (\ell_2,\upsilon_{[i \rightarrow 1, x \rightarrow 2, y \rightarrow 1]})$ is not a valid evaluation step, since $i \geq x$ does not hold for both evaluations.
+
+We define a program component $\mathcal{C} \subseteq \mathcal{T}$ as a strongly connected component (SCC) of a program.
+We denote with $\mathcal{E}_\mathcal{C}$ its entry transition set which consists of all transitions $t = (\ell, \tau, \ell')$ such that $\ell'$ appears in $\mathcal{C}$ but $t \notin \mathcal{C}$.
+
+The example program contains three SCCs. Every location represents in this case its own SCC. On the one hand there is the trivial SCC $C_0 = \emptyset$ for the location $\ell_0$, on the other hand there are the nontrivial SCCs $C_1 = \lbrace t_3 \rbrace$ and $C_2 = \lbrace t_5 \rbrace$.
+The entry transitions of those SCCs are $\mathcal{E}_{\mathcal{C}_0} = \lbrace t_0 \rbrace$, $\mathcal{E}_{\mathcal{C}_1} = \lbrace t_1 \rbrace$ and $\mathcal{E}_{\mathcal{C}_2} = \lbrace t_2, t_4 \rbrace$.
+
+\begin{figure}
+\centering
+\begin{tikzpicture}[->,>=stealth',auto,node distance=3.5cm,
+    thick,
+    main node/.style={circle,draw,font=\sffamily\Large\bfseries},
+    aligned edge/.style={align=left}]
+
+  \node[main node, fill=green] (0) {$l_0$};
+  \node[main node, fill=red] (1) [right of=0] {$l_1$};
+  \node[main node, fill=blue] (2) [right of=1] {$l_2$};
+
+  \node (4) [right of=2] {};
+  \node (5) [left of=0] {};
+
+  \path[every node/.style={font=\sffamily\small}]
+    (0) edge[color=red!50!white] node {$t_1$} (1)
+        edge[color=blue!50!white, bend right=25] node [below] {$t_2$} (2)
+    (1) edge[color=red, loop above] node {$t_3$} (1)
+        edge[color=blue!50!white] node {$t_4$} (2)
+    (2) edge[color=blue, loop above] node {$t_5$} (2)
+        edge node {$t_6$} (4)
+    (5) edge[color=green!50!white] node {$t_0$} (0);
+\end{tikzpicture}
+\caption{The example program with the SCCs and entry transitions marked}
+\end{figure}
+
+We define an assertion as a pair $(t, \phi)$ where $t \in T$ and $\phi \in \mathcal{F}(\mathcal{V})$.
+We say that a program is safe for an assertion if and only if $\forall (\ell_0, \upsilon_0): (\ell_0, \upsilon_0) \rightarrow_P^* \circ \rightarrow_t (\ell, \upsilon) \Rightarrow \upsilon \models \phi$.
+We say that a program is conditional safe for an assertion if from a state where a precondition holds every path to an assertion also leads to the fulfillment of the assertion.
+The example program contains one assertion $(t_6, x \neq y)$. The goal is to show that the program is safe for this assertion. The algorithm uses the conditional safety property for this purpose.
+
+\subsection{Invariants}
+
+An invariant is defined as an assignment $\mathcal{I} : \mathcal{L} \rightarrow \mathcal{F}(\mathcal{V})$ if and only if for all reachable states $(\ell, \upsilon)$ it holds that $\upsilon \models \mathcal{I}(\ell)$.
+For instance a function with $\mathcal{I}(\ell) = x > 0$ for each location $\ell \in \mathcal{L}$ is an invariant.
+
+An invariant is inductive if and only if additionally it holds that $\top \models \mathcal{I}(\ell_0)$ and for all $(\ell, \tau, \ell') \in \mathcal{P}$ it holds that $\mathcal{I}(\ell) \wedge \tau \models \mathcal{I}(\ell')'$. We call the first initiation condition and the latter consecution condition.
+$\mathcal{I}$ with $\mathcal{I}(\ell_0) = x > 0 \wedge y > 0 \wedge i = 0$, $\mathcal{I}(\ell_1) = x > 0 \wedge y > 0$ and $\mathcal{I}(\ell_2) = x \neq y$ \todo{Check} is an inductive invariant of the example program as we will see.
+
+An invariant is an conditional inductive invariant if and only if for all $(\ell, \upsilon) \rightarrow_\mathcal{P} (\ell', \upsilon')$ it holds that $\upsilon \models \mathcal{Q}(\ell) \Rightarrow \upsilon' \models \mathcal{Q}(\ell')$.
+In contrast to inductive invariants those conditional inductive invariants does not hold from the program start on, but from a specific state on.
+We call conditional inductive invariants CII from this point on.
+
+\todo{Top-down vs bottom-up construction}

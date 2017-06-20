@@ -1,0 +1,69 @@
+\section{Introduction}
+\label{sec:introduction}
+
+\subsection{Compositional safety verification}
+
+Safety verification is the task to ensure that an assertion at a certain program location is always true regardless of the input.
+Formally a program is safe for an assertion if every evaluation path of the program leads to the fulfillment of the assertion.
+While this definition describes a global analysis of the whole program, it is also possible to analyze components of a program and combine the results.
+The advantage of this compositional method is its scalability, but in many cases there is a loss in precision due to fewer information in the separated analysis.
+
+Since variables in a program can potentially be global and therefore a change of a variable at a location can have a huge impact on other parts of the program, it is not possible to analyze parts of the program completely independent. \todo{Example?}
+Therefore the presented algorithm analyses parts semi-independently, where the analysis of the parts gets combined and eventually reanalyzed.
+
+\subsection{Structure}
+
+This paper aims at explaining the algorithm for compositional safety verification with a single example.
+In the next section of this chapter this example will be presented.
+The following chapter will cover formal definitions of program graphs and invariants and illustrate them by the presented example.
+
+The third chapter will introduce the algorithm. 
+At first an overview over the basic analysis of a whole program will be given and explained by the example, after that narrowing and the analysis of components will be explained.
+For the analysis of components Max-SMT-Solving, an extension of SMT-Solving, will be introduced.
+
+In the end a summary of the method will be given.
+
+\subsection{Example program}
+
+\begin{figure}
+\centering
+\begin{tikzpicture}[->,>=stealth',auto,node distance=3.5cm,
+    thick,
+    main node/.style={circle,draw,font=\sffamily\Large\bfseries},
+    aligned edge/.style={align=left}]
+
+  \node[main node] (0) {$l_0$};
+  \node[main node] (1) [right of=0] {$l_1$};
+  \node[main node] (2) [right of=1] {$l_2$};
+
+  \node (4) [right of=2] {};
+  \node (5) [left of=0] {};
+
+  \path[every node/.style={font=\sffamily\small}]
+    (0) edge[aligned edge] node {$t_1: x \geq y$} (1)
+        edge[aligned edge, bend right=25] node [below] {$t_2: y > x$} (2)
+    (1) edge[aligned edge, loop above] node {$t_3:$\\$i < x \wedge$\\$y' = y + 1 \wedge$\\$i' = i + 1$} (1)
+        edge[aligned edge] node {$t_4: i \geq x$} (2)
+    (2) edge[aligned edge, loop above] node {$t_5:$\\$x' = x + 1 \wedge$\\$y' = y + 1$} (2)
+        edge[aligned edge] node {$t_6$, assert($x \neq y$)} (4)
+    (5) edge[aligned edge] node {$t_0:$\\$x > 0 \wedge$\\$y > 0 \wedge$\\$i' = 0$} (0);
+\end{tikzpicture}
+\caption{Example program}
+\label{fig:example}
+\end{figure}
+
+To show the inner workings of the algorithm, we will use a single example and explain based on that the different techniques of the algorithm.
+
+The example program is shown in \ref{fig:example}.
+It has three input parameters $x>0$, $y>0$ and $i=0$.
+The task of the safety verification is to assure, that after every possible evaluation $x \neq y$ holds.
+
+We can easily show this property of the program intentionally:
+Starting at $l_0$ we can move on to $l_2$ if $y>x$.
+With every iteration with $t_5$ also $y+1>x+1$ holds and therefore $x \neq y$ holds in the end of the program.
+Starting at $l_0$ we can also move to $l_1$ if $x \geq y$.
+Since $i=0$ we use $t_3$ exactly $x$ times before moving on to $l_2$.
+At this moment the value of $y$ is $y + x * 1$.
+Since $x$ and $y$ are positive, now it holds that $y \geq x$.
+$t_5$ can not change that and therefore $x \neq y$ holds.
+\todo{Put whole block after program definition?}

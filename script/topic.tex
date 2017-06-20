@@ -1,0 +1,251 @@
+\section{The Algorithm}
+\label{sec:topic}
+
+In the previous chapter we covered the formal basics of a program graph and invariants and introduced an example graph, which we will inspect in this chapter.
+
+The algorithm uses a bottom-up approach. It analyses each component (SCC) of a program and combines the results.
+In a first step we will abstract from the analysis of the components, treat them as given and introduce the combination of the analysis to give an overview first.
+The analyser of the components is called CondSafe, while the overall combination is called CheckSafe.
+
+\subsection{CheckSafe}
+
+The given program consists of the three SCCs $C_0$, $C_1$ and $C_2$.
+The SCC $C_2$ has an exit transition $t_6$ which is annotated with an assertion $x \neq y$.
+The overall algorithm first tries to find a CII which holds directly before $C_2$ and which satisfies the assertion condition.
+The only transition in $C_2$ is $t_5$. If $t_5$ occurs in an evaluation, it has no effect on the equality of $x$ and $y$, since it increments both $x$ and $y$ with the same constant.
+Therefore we can conclude that if we can show that prior to $C_2$ for every evaluation $x \neq y$ holds, it will also hold after $C_2$.
+
+Unfortunately CondSafe is only able to find either the CII $x > y$ or $y > x$. This does not affect correctness since both CIIs imply $x \neq y$, but it affects completeness.
+Therefore the authors of the original paper introduced a technique they called narrowing.
+The idea behind narrowing is to try to prove safety with the CII CondSafe returns.
+If this fails CheckSafe is then able to backtrack, filter evaluations and force CondSafe to return a different CII.
+
+We assume the analyzer finds the CII $x < y$ first.
+The algorithm will now try to recursively find further CIIs such that $x > y$ holds after each component occurring directly before $C_2$.
+
+The entry transitions of $C_2$ are $t_2$ and $t_4$.
+The SCC that has $t_2$ as exit transition is $C_0 = \emptyset$, the SCC that has $t_4$ as exit transition is $C_1 = \lbrace t_3 \rbrace$.
+We need to find a CII for both SCCs, otherwise narrowing is necessary.
+Since $y > x$ has to be satisfied for $t_2$ to occur in an evaluation, both $y > x$ and $x > y$ need to be satisfied by the same evaluation step.
+Those conditions contradict each other, therefore there is no evaluation satisfying the postcondition and no precondition can be found to imply the postcondition.
+
+We can not prove safety with the CII $x > y$, therefore we narrow on $C_2$ and find $y > x$ instead.
+Again it is necessary to find CIIs for all entry SCCs.
+For the exit transition $t_2$ of $C_0$ the postcondition and the condition of the transition are now both $y > x$.
+Since the postcondition is implied by the exit transition, the SCC $C_0$ is safe.
+
+The exit transition of $C_1$ is $t_4$.
+We need to find a precondition on the entry transition $t_1$ such that the postcondition $y > x$ is implied.
+
+\todo{Either go on with $C_1$ or change it first}
+
+\begin{algorithm}
+\caption{CheckSafe}\label{checksafe}
+\begin{algorithmic}[1]
+\State $\mathcal{P} \gets \text{program}$
+\State $\mathcal{C} \gets \text{strongly connected component}$
+\State $\mathcal{E}_\mathcal{C} \gets \text{entry transitions of } \mathcal{C}$
+\State $(t_\text{exit}, \varphi) \gets \text{assertion with exit transition } t_\text{exit} \text{ and clause } \varphi$
+\State $(\ell_\text{exit}, \tau_\text{exit}, \ell'_\text{exit}) \gets t_\text{exit}$
+\If {$\tau_\text{exit} \Rightarrow \varphi'$}
+  \Return Safe
+\ElsIf {$\ell_\text{exit} = \ell_0$}
+  \Return Maybe
+\EndIf
+\State $\mathcal{Q} \rightarrow \text{CondSafe}(\mathcal{C}, \mathcal{E}_\mathcal{C}, (t_\text{exit}, \varphi))$
+\If {$\mathcal{Q} = \text{None}$}
+  \Return Maybe
+\EndIf
+\ForAll {$t = (\ell, \tau, \ell') \in \mathcal{E}_\mathcal{C}, \mathcal{L} \in \mathcal{Q}(\ell')$}
+  \State $\tilde{\mathcal{C}} \gets \text{component}(\ell, \mathcal{P})$
+  \State $\mathcal{E}_{\tilde{\mathcal{C}}} \gets \text{entries}(\tilde{\mathcal{C}}, \mathcal{P})$
+  \State $\text{res}[t, \mathcal{L}] \gets \text{CheckSafe}(\mathcal{P}, \tilde{\mathcal{C}}, \mathcal{E}_{\tilde{\mathcal{C}}}, (t, \mathcal{L}))$
+\EndFor
+\If {$\forall t = (\ell, \tau, \ell') \in \mathcal{E}_\mathcal{C}, \mathcal{L} \in \mathcal{Q}(\ell'): \text{res}[t, \mathcal{L}] = \text{Safe}$}
+  \Return Safe
+\Else
+  \State $\tilde{\mathcal{E}}_{\tilde{\mathcal{C}}} \gets \lbrace (\ell, \tau \wedge \neg (\bigwedge_{\mathcal{L} \in \mathcal{Q}(\ell') \wedge \text{res}[t, \mathcal{L}]=\text{Maybe}}{\mathcal{L}'}), \ell') \mid t = (\ell, \tau, \ell') \in \mathcal{E}_\mathcal{C} \rbrace$
+  \State $\tilde{\mathcal{C}} \gets \lbrace (\ell, \tau \wedge \neg\mathcal{Q}(\ell')' \wedge \neg\mathcal{Q}(\ell), \ell') \mid (\ell, \tau, \ell') \in \mathcal{C} \rbrace$
+\EndIf
+\Return $\text{CheckSafe}(\mathcal{P}, \tilde{\mathcal{C}}, \tilde{\mathcal{E}}_{\tilde{\mathcal{C}}}, (t_\text{exit}, \varphi))$
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Narrowing}
+
+Until this point we abstracted from the inner workings of narrowing.
+The idea of narrowing is to inspect a manipulated version of the original program, which enables the algorithm CondSafe to find an additional conditional inductive invariant.
+This invariant could then be used to prove safety for not yet shown evaluations.
+In the example program it would be sufficient to show that the post condition $x > y$ holds after each evaluation step before the location $l_2$.
+But this can not be shown for both entry transitions.
+
+We know by construction of the conditional invariant $x > y$ that each evaluation satisfying $x > y$ before entering $C_2$ is safe for the assertion.
+Thus we can exclude those evaluations from the original program.
+This is possible if we add to both entry transitions an additional clause $\neg (x > y)$ which is equivalent to $x \leq y$.
+This way we guarantee that no evaluation with $x > y$ at the entry transitions passes to $C_2$ and therefore they got excluded from the program.
+Additionally we can modify the transitions inside an SCC to exclude further evaluations, because $x > y$ is either true at the start location or at the end location of the transition.
+\todo{Correct?}
+After narrowing we obtain the program graph presented in figure \ref{fig:narrowed}. The added conditions are colored blue.
+
+\begin{figure}
+\centering
+\begin{tikzpicture}[->,>=stealth',auto,node distance=3.5cm,
+    thick,
+    main node/.style={circle,draw,font=\sffamily\Large\bfseries},
+    aligned edge/.style={align=left}]
+
+  \node[main node] (0) {$l_0$};
+  \node[main node] (1) [right of=0] {$l_1$};
+  \node[main node] (2) [right of=1] {$l_2$};
+
+  \node (4) [right of=2] {};
+  \node (5) [left of=0] {};
+  
+  \path[every node/.style={font=\sffamily\small}]
+    (0) edge[aligned edge] node {$t_1: x \geq y$} (1)
+        edge[aligned edge, bend right=25] node [below] {$t_2: y > x \wedge${\color{blue}$x \leq y$}} (2)
+    (1) edge[aligned edge, loop above] node {$t_3:$\\$i < x \wedge$\\$y' = y + 1 \wedge$\\$i' = i + 1$} (1)
+        edge[aligned edge] node {$t_4:$\\$i \geq x \wedge$\\{\color{blue}$x \leq y$}} (2)
+    (2) edge[aligned edge, loop above] node {$t_5:$\\$x' = x + 1 \wedge$\\$y' = y + 1 \wedge$\\{\color{blue}$x \leq y$}} (2)
+        edge[aligned edge] node {$t_6$, assert($x \neq y$)} (4)
+    (5) edge[aligned edge] node {$t_0:$\\$x > 0 \wedge$\\$y > 0 \wedge$\\$i' = 0$} (0);
+\end{tikzpicture}
+\caption{Narrowed example program}
+\label{fig:narrowed}
+\end{figure}
+
+The addition of narrowing has the effect of adding backtracking to the main algorithm.
+It leads to a tree-like exploration from the exit state on to the initial states.
+Only if the exploration can successfully reach every initial state for each sequence of SCCs safety is guaranteed.
+This is shown by figure \ref{fig:backtrack}.
+For the example it is sufficient to explore the one of the leafes with $t_4$ in its path to the root and one of the leafes with $t_2$ in its path to the root.
+The algorithm first detects $x < y$ as precondition of $l_2$, which we can not prove safe for neither of the two paths.
+Therefore the other two paths both must ensure safety.
+The number of possible narrowing steps at $l_2$ is two in this example, but in more complex programs there can be an arbitrary number of narrowing steps necessary at a SCC.
+
+\begin{figure}
+\centering
+\begin{tikzpicture}[->,>=stealth',auto,node distance=2.5cm,
+    thick,
+    main node/.style={circle,draw,font=\sffamily\Large\bfseries},
+    aligned edge/.style={align=left}]
+
+  \node[main node] (0) {$\ell_2$};
+  \node[main node] (12) [below left of=0] {$\ell_1$};
+  \node[main node] (13) [below right of=0] {$\ell_0$};
+  \node[main node] (11) [left of=12] {$\ell_1$};
+  \node[main node] (14) [right of=13] {$\ell_0$};
+  \node[main node] (21) [below of=11] {$\ell_0$};
+  \node[main node] (22) [below of=12] {$\ell_0$};
+
+  \node (start) [above of=0] {};
+  
+  \path[every node/.style={font=\sffamily\small}]
+    (start) edge node {$t_6$, $x \neq y$} (0)
+    (0) edge node[above left] {$t_4$, $x < y$} (11)
+    (0) edge node[right] {$t_4$, $y < x$} (12)
+    (0) edge node[below left] {$t_2$, $x < y$} (13)
+    (0) edge node[above right] {$t_2$, $y < x$} (14)
+    (11) edge node {$t_1$, TODO} (21)
+    (12) edge node {$t_1$, TODO} (22);
+\end{tikzpicture}
+\caption{Tree-like exploration of evaluations}
+\label{fig:backtrack}
+\end{figure}
+
+\subsubsection{Special cases of Narrowing}
+
+\todo{Maybe describe more complicated narrowing here}
+
+\subsection{CondSafe}
+
+Another procedure the algorithm CheckSafe uses is the algorithm CondSafe.
+It analyses SCCs of the program and tries to find a conditional inductive invariant such that a post condition is implied.
+
+For performance reasons it only takes a post condition which consists of a single clause.
+This is no real restriction, because each conjunction of conditions can be split into single transitions and be analyzed independently.
+
+The aim is to find an invariant that consists of as less conjunctions of clauses as possible.
+Therefore the algorithm uses an iterative approach.
+In a first step it tries to find an invariant consisting of a single clause.
+If this is not possible, it expands its search spectrum and searches for clauses consisting of two clauses.
+The algorithm terminates if either an invariant with a specific count of clauses is found or a certain constant is reached.
+
+\begin{algorithm}
+\caption{CondSafe}\label{condsafe}
+\begin{algorithmic}[1]
+\State $\mathcal{C} \gets \text{strongly connected component}$
+\State $\mathcal{E}_\mathcal{C} \gets \text{entry transitions of } \mathcal{C}$
+\State $(t_\text{exit}, \varphi) \gets \text{assertion with exit transition } t_\text{exit} \text{ and clause } \varphi$
+\State $k \gets 1$
+\Repeat
+  \State construct formula $\mathbb{F}_k$ from $\mathcal{C}$, $\mathcal{E}_\mathcal{C}$ and $t_\text{exit}, \varphi$
+  \State $\sigma \gets \text{MAX-SMT-Solver}(\mathbb{F}_k)$
+  \If {$\sigma$ is a model}
+    \State $\mathcal{Q} \gets \lbrace \ell \rightarrow \sigma(I_{\ell, k}) \mid \ell \in \mathcal{C} \rbrace$
+    \Return $\mathcal{Q}$
+  \EndIf
+  \State $k \gets k + 1$
+\Until{$k > \text{MAX\_CONJUNCTS}$}
+\Return None
+\end{algorithmic}
+\end{algorithm}
+
+To find a conditional inductive invariant with a certain size of clauses the algorithm uses a Max-SMT-Solver, which will be explained in the next chapter.
+
+\subsubsection{Max-SMT}
+
+Let $\mathcal{P}$ be a fixed set of propositional variables.
+We call $p$ and $\neg p$ literals for all $p \in \mathcal{P}$.
+We define a clause as disjunction of literals $l_1 \vee \dots \vee \l_n$ and a propositional formula as conjunction of clauses $C_1 \wedge \dots \wedge C_m$.
+
+With a SAT-Solver it is possible to determine if a propositional formula is satisfiable.
+An SMT-Solver is able to check the satisfiability of a formula with literals from a given background theory.
+For both solvers there exist extensions called Max-SAT and Max-SMT.
+Those extensions provide the possibility to declare constraints as soft with a weight.
+A soft constraints does not have to be satisfied, but the solver will try to maximize the sum of the weights of the soft constraints.
+
+Formally a Max-SMT problem is a formula $H_1 \wedge \dots \wedge H_n \wedge [S_1,\omega_1] \wedge \dots \wedge [S_m,\omega_m]$, where $H_i$ denote the hard clauses, which also occur in an SMT problem, and $[S_i,\omega_i]$ denote the soft clauses and their weight.
+
+To find conditional inductive invariants for program parts we create hard constraints for the consecution and safety conditions and a soft constraint for the initiation condition.
+While the consecution condition ensures that the invariant is inductive and the safety condition ensures the assertion is implied, the initiation condition does not need to be fulfilled and thus the resulting invariant might depend on additional preconditions.  
+
+In the definition of the condition we use for each location in the SCC the template \[ I_{\ell,k}(\mathcal{V}) \equiv \bigwedge_{1 \leq j \leq k}{I_{\ell,j,k}(\mathcal{V})} \] which is a conjunction of $k$ linear inequations \[ I_{\ell,j,k}(\mathcal{V}) \equiv i_{\ell,j} + \sum_{v \in \mathcal{V}}{i_{\ell,j,v} * v} \leq 0 \]
+For instance the template for the SCC $\mathcal{C}_2 = \lbrace t_5 \rbrace$ and a $k=1$ is \[ I_{\ell_2,1}(\lbrace x, y, i \rbrace) \equiv i_{\ell_2,1} + i_{\ell_2,1,x} * x + i_{\ell_2,1,y} * y + i_{\ell_2,1,i} * i \leq 0 \]
+
+We write $I'_{\ell,k}$ instead of $I_{\ell,k}$ if we use $v' \in \mathcal{V}'$ instead of $v \in \mathcal{V}$.
+With those definitions we define the initiation condition for a transition $t = (\ell, \tau, \ell') \in \mathcal{E}_\mathcal{C}$ and numbers $j, k \in \mathbb{N}$ with $1 \leq j \leq k$ as \[ \mathbb{I}_{t,j,k} \equiv \tau \Rightarrow I'_{l',j,k} \]
+For each transition $t = (\ell, \tau, \ell') \in \mathcal{C}$ and number $k \in \mathbb{N}$ we define the consecution condition as \[ \mathbb{C}_{t,k} \equiv I_{\ell,k} \wedge \tau \Rightarrow I'_{\ell,k} \]
+The safety condition we define for an exit transition $t_\text{exit} = (\tilde{\ell}_\text{exit}, \tau_\text{exit}, \ell_\text{exit})$ as \[ \mathbb{S}_k \equiv I_{\tilde{\ell}_\text{exit},k} \wedge \tau_\text{exit} \Rightarrow \varphi' \]
+
+For instance for the SCC $\mathcal{C}_2$ and a $k=1$ the two initiation conditions are \[ \mathbb{I}_{t_2, 1, 1} \equiv i \geq x \Rightarrow i_{\ell_2,1} + i_{\ell_2,1,x} * x' + i_{\ell_2,1,y} * y' + i_{\ell_2,1,i} * i' \leq 0 \] and \[ \mathbb{I}_{t_4, 1, 1} \equiv y > x \Rightarrow i_{\ell_2,1} + i_{\ell_2,1,x} * x' + i_{\ell_2,1,y} * y' + i_{\ell_2,1,i} * i' \leq 0 \]
+The single consecution condition is
+\begin{multline}
+  \mathbb{C}_{t_5, 1} \equiv i_{\ell_2,1} + i_{\ell_2,1,x} * x + i_{\ell_2,1,y} * y + i_{\ell_2,1,i} * i \leq 0 \wedge x' = x + 1 \wedge y' = y + 1 \\
+  \Rightarrow i_{\ell_2,1} + i_{\ell_2,1,x} * x' + i_{\ell_2,1,y} * y' + i_{\ell_2,1,i} * i' \leq 0
+\end{multline}
+The single safety condition is
+\[ \mathbb{S}_1 \equiv i_{\ell_2,1} + i_{\ell_2,1,x} * x + i_{\ell_2,1,y} * y + i_{\ell_2,1,i} * i \leq 0 \wedge \text{true} \Rightarrow x' \neq y' \]
+  
+Those templates for the three different conditions we can put together in a Max-SMT problem:
+\[ \mathbb{F}_k \equiv \bigwedge_{t \in \mathcal{C}} \mathbb{C}_{t, k} \wedge \mathbb{S}_k \wedge \bigwedge_{t \in \mathcal{E}_\mathcal{C}, 1 \leq j \leq k}{(\mathbb{I}_{t,j,k} \vee \neg p_{\mathbb{I}_{t,j,k}})} \wedge \bigwedge_{t \in \mathcal{E}_\mathcal{C}, 1 \leq j \leq k}{[p_{\mathbb{I}_{t,j,k}}, \omega_\mathbb{I}]} \]
+The propositional variables $p_{\mathbb{I}_{t,j,k}}$ get false if the initiation condition $\mathbb{I}_{t,j,k}$ is not satisfied.
+Therefore the related soft constraints does not need to be optimized anymore.
+\todo{Correct?}
+
+For the example this is equal to:
+\[ \mathbb{F}_1 \equiv \mathbb{C}_{t_5, 1} \wedge \mathbb{S}_1 \wedge ((\mathbb{I}_{t_2,1,1} \vee \neg p_{\mathbb{I}_{t_2,1,1}}) \wedge (\mathbb{I}_{t_4,1,1} \vee \neg p_{\mathbb{I}_{t_4,1,1}})) \wedge ([p_{\mathbb{I}_{t_2,1,1}}, \omega_\mathbb{I}] \wedge [p_{\mathbb{I}_{t_4,1,1}}, \omega_\mathbb{I}]) \]
+
+If we assume the Max-SMT-Solver returned $x > y$ as maximally satisfying condition for $\mathbb{F}_1$, we can verify if this is a model.
+The condition $x > y$ relates to the template instantiated with $I_{\ell,1}(\lbrace x, y, i \rbrace) \equiv 1 + (-1) * x + 1 * y + 0 * i \leq 0$.
+Inserted into the initiation, safety and consecution condition we get:
+\begin{align}
+  \mathbb{I}_{t_2, 1, 1} \equiv & i \geq x \Rightarrow x' > y'\\
+  \mathbb{I}_{t_4, 1, 1} \equiv & y > x \Rightarrow x' > y'\\
+  \mathbb{C}_{t_5, 1} \equiv & x > y \wedge x' = x + 1 \wedge y' = y + 1 \Rightarrow x' > y'\\
+  \mathbb{S}_1 \equiv & x > y \wedge \text{true} \Rightarrow x' \neq y'
+\end{align}
+
+\todo{Verify with example}
+
+\todo{Check formulas}
