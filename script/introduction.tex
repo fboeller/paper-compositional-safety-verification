@@ -55,15 +55,15 @@ In the end a summary of the method will be given.
 To show the inner workings of the algorithm, we will use a single example and explain based on that the different techniques of the algorithm.
 
 The example program is shown in \ref{fig:example}.
-It has three input parameters $x>0$, $y>0$ and $i=0$.
+It has three input parameters $x>0$, $y>0$ and $i>0$.
 The task of the safety verification is to assure, that after every possible evaluation $x \neq y$ holds.
 
 We can easily show this property of the program intentionally:
 Starting at $l_0$ we can move on to $l_2$ if $y>x$.
 With every iteration with $t_5$ also $y+1>x+1$ holds and therefore $x \neq y$ holds in the end of the program.
 Starting at $l_0$ we can also move to $l_1$ if $x \geq y$.
-Since $i=0$ we use $t_3$ exactly $x$ times before moving on to $l_2$.
-At this moment the value of $y$ is $y + x * 1$.
-Since $x$ and $y$ are positive, now it holds that $y \geq x$.
-$t_5$ can not change that and therefore $x \neq y$ holds.
+Since $i>0$ we must use $t_3$ at least one time before moving on to $l_2$.
+Since $t_3$ increments the value of $x$, $x > y$ holds after one usage of $t_3$.
+Again $t_5$ can not change the relation between $x$ and $y$ and therefore $x \neq y$ holds also for this case.
+
 \todo{Put whole block after program definition?}
