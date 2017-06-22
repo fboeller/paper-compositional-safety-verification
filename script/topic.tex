@@ -17,10 +17,10 @@ Therefore we can conclude that if we can show that prior to $C_2$ for every eval
 
 Unfortunately CondSafe is only able to find either the CII $x > y$ or $y > x$. This does not affect correctness since both CIIs imply $x \neq y$, but it affects completeness.
 Therefore the authors of the original paper introduced a technique they called narrowing.
-The idea behind narrowing is to try to prove safety with the CII CondSafe returns.
+The idea behind narrowing is to try first to prove safety with the CII CondSafe returns.
 If this fails CheckSafe is then able to backtrack, filter evaluations and force CondSafe to return a different CII.
 
-We assume the analyzer finds the CII $x < y$ first.
+We assume the analyzer finds the CII $x > y$ first.
 The algorithm will now try to recursively find further CIIs such that $x > y$ holds after each component occurring directly before $C_2$.
 
 The entry transitions of $C_2$ are $t_2$ and $t_4$.
@@ -29,15 +29,21 @@ We need to find a CII for both SCCs, otherwise narrowing is necessary.
 Since $y > x$ has to be satisfied for $t_2$ to occur in an evaluation, both $y > x$ and $x > y$ need to be satisfied by the same evaluation step.
 Those conditions contradict each other, therefore there is no evaluation satisfying the postcondition and no precondition can be found to imply the postcondition.
 
-We can not prove safety with the CII $x > y$, therefore we narrow on $C_2$ and find $y > x$ instead.
-Again it is necessary to find CIIs for all entry SCCs.
-For the exit transition $t_2$ of $C_0$ the postcondition and the condition of the transition are now both $y > x$.
-Since the postcondition is implied by the exit transition, the SCC $C_0$ is safe.
+The SCC before $t_4$ is $C_1$.
+We need to find a CII that ensures that after $C_1$ it holds that $x > y$.
+If we run CondSafe for this SCC it could return $i > 0 \wedge x \geq y$ as precondition for $t_1$, because it ensures that $t_3$ is run at least once and therefore implies that $x > y$ holds at $t_4$.
 
-The exit transition of $C_1$ is $t_4$.
-We need to find a precondition on the entry transition $t_1$ such that the postcondition $y > x$ is implied.
+The literals of both preconditions now get propagated independently to $C_0$.
+$x \geq y$ is directly implied by the condition of $t_1$ and therefore this part of the CII is safe.
+For the safety prove of $i > 0$ we need to inspect $C_0$.
+Since $C_0 = \emptyset$ CondSafe will detect that the postcondition has already to be met at the entry transitions, therefore the preconditions equal the postconditions.
+Because the only entry transition $t_0$ of $C_0$ implies $i > 0$, CondSafe proves the SCC as safe and propagates this result back to $C_2$.
 
-\todo{Change $C_1$ first, then describe}
+At this point CheckSafe knows that $x > y$ holds after every occurence of $t_4$ for every evaluation, but it does not hold for $t_2$.
+Therefore we need to narrow the program and find the CII $y > x$ instead.
+Since we already found $t_4$ to be safe, we inspect $t_2$ with this CII.
+For the exit transition $t_2$ of $C_0$ the condition of the transition now implies the postcondition $y > x$.
+Therefore this path is also proved safe.
 
 \begin{algorithm}
 \caption{CheckSafe}\label{checksafe}
@@ -99,7 +105,7 @@ After narrowing we obtain the program graph presented in figure \ref{fig:narrowe
     (0) edge[aligned edge] node {$t_1: x \geq y$} (1)
         edge[aligned edge, bend right=25] node [below] {$t_2: y > x \wedge \mathbf{x \leq y}$} (2)
     (1) edge[aligned edge, loop above] node {$t_3:$\\$i < x \wedge$\\$y' = y + 1 \wedge$\\$i' = i + 1$} (1)
-        edge[aligned edge] node {$t_4:$\\$i \geq x \wedge$\\$\mathbf{x \leq y}$} (2)
+        edge[aligned edge] node {$t_4:$\\$i \geq x$} (2)
     (2) edge[aligned edge, loop above] node {$t_5:$\\$x' = x + 1 \wedge$\\$y' = y + 1 \wedge$\\$\mathbf{x \leq y}$} (2)
         edge[aligned edge] node {$t_6$, assert($x \neq y$)} (4)
     (5) edge[aligned edge] node {$t_0:$\\$x > 0 \wedge$\\$y > 0 \wedge$\\$i' = 0$} (0);
@@ -120,9 +126,17 @@ The number of possible narrowing steps at $l_2$ is two in this example, but in m
 \begin{algorithm}
 \caption{Narrowing}\label{narrowing}
 \begin{algorithmic}[1]
-  \State $\tilde{\mathcal{E}}_{\tilde{\mathcal{C}}} \gets \lbrace (\ell, \tau \wedge \neg (\bigwedge_{\mathcal{L} \in \mathcal{Q}(\ell') \wedge \text{res}[t, \mathcal{L}]=\text{Maybe}}{\mathcal{L}'}), \ell') \mid t = (\ell, \tau, \ell') \in \mathcal{E}_\mathcal{C} \rbrace$
-  \State $\tilde{\mathcal{C}} \gets \lbrace (\ell, \tau \wedge \neg\mathcal{Q}(\ell')' \wedge \neg\mathcal{Q}(\ell), \ell') \mid (\ell, \tau, \ell') \in \mathcal{C} \rbrace$
-  \Return $(\tilde{\mathcal{E}}_{\tilde{\mathcal{C}}}, \tilde{\mathcal{C}})$
+  \ForAll {entry transitions}
+    \ForAll {literals of the CII}
+      \If {literal could not be proved safe for this transition}
+        \State Add a conjunct with the negated literal to the transition
+      \EndIf
+    \EndFor
+  \EndFor
+  \ForAll {transitions of the SCC}  
+    \State Add a conjunct with the negated CII at the start location to the transition
+    \State Add a conjunct with the negated CII at the end location to the transition
+  \EndFor
 \end{algorithmic}
 \end{algorithm}
 
