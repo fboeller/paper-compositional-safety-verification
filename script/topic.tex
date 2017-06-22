@@ -190,16 +190,13 @@ The algorithm terminates if either an invariant with a specific count of clauses
 \begin{algorithm}
 \caption{CondSafe}\label{condsafe}
 \begin{algorithmic}[1]
-\State $\mathcal{C} \gets \text{strongly connected component}$
-\State $\mathcal{E}_\mathcal{C} \gets \text{entry transitions of } \mathcal{C}$
-\State $(t_\text{exit}, \varphi) \gets \text{assertion with exit transition } t_\text{exit} \text{ and clause } \varphi$
+\State Input: An SCC, the entry transitions of the SCC, an exit transition with an assertion
 \State $k \gets 1$
 \Repeat
-  \State construct formula $\mathbb{F}_k$ from $\mathcal{C}$, $\mathcal{E}_\mathcal{C}$ and $t_\text{exit}, \varphi$
-  \State $\sigma \gets \text{MAX-SMT-Solver}(\mathbb{F}_k)$
-  \If {$\sigma$ is a model}
-    \State $\mathcal{Q} \gets \lbrace \ell \rightarrow \sigma(I_{\ell, k}) \mid \ell \in \mathcal{C} \rbrace$
-    \Return $\mathcal{Q}$
+  \State Construct a formula $\mathbb{F}_k$ for the SCC and the assertion
+  \State Call the Max-SMT-Solver with $\mathbb{F}_k$
+  \If {it returned a solution}
+    \Return an invariant assigning each location the according condition from $\mathbb{F}_k$
   \EndIf
   \State $k \gets k + 1$
 \Until{$k > \text{MAX\_CONJUNCTS}$}
