@@ -223,22 +223,35 @@ Formally a Max-SMT problem is a formula $H_1 \wedge \dots \wedge H_n \wedge [S_1
 To find CIIs for program parts we create hard constraints for the consecution and safety conditions and a soft constraint for the initiation condition.
 While the consecution condition ensures that the invariant is inductive and the safety condition ensures that the assertion is implied, the initiation condition does not need to be fulfilled and thus the resulting invariant might depend on additional preconditions.  
 
-In the definition of the condition we use for each location in the SCC the template \[ I_{\ell,k}(\mathcal{V}) \equiv \bigwedge_{1 \leq j \leq k}{I_{\ell,j,k}(\mathcal{V})} \] which is a conjunction of $k$ linear inequations \[ I_{\ell,j,k}(\mathcal{V}) \equiv i_{\ell,j} + \sum_{v \in \mathcal{V}}{i_{\ell,j,v} * v} \leq 0 \]
+In the definition of the condition we use for each location in the SCC the templates $I_{\ell,k}$ and $I_{\ell,j,k}$, where $I_{\ell,k}$ is a conjunction of $k$ templates $I_{\ell,j,k}$.
+\begin{align}
+  I_{\ell,k}(\mathcal{V}) \equiv & \bigwedge_{1 \leq j \leq k}{I_{\ell,j,k}(\mathcal{V})}\\
+  I_{\ell,j,k}(\mathcal{V}) \equiv & i_{\ell,j} + \sum_{v \in \mathcal{V}}{i_{\ell,j,v} * v} \leq 0
+\end{align}
 For instance the template for the SCC $\mathcal{C}_2 = \lbrace t_5 \rbrace$ and a $k=1$ is \[ I_{\ell_2,1}(\lbrace x, y, i \rbrace) \equiv i_{\ell_2,1} + i_{\ell_2,1,x} * x + i_{\ell_2,1,y} * y + i_{\ell_2,1,i} * i \leq 0 \]
-
 We write $I'_{\ell,k}$ instead of $I_{\ell,k}$ if we use $v' \in \mathcal{V}'$ instead of $v \in \mathcal{V}$.
-With those definitions we define the initiation condition for a transition $t = (\ell, \tau, \ell') \in \mathcal{E}_\mathcal{C}$ and numbers $j, k \in \mathbb{N}$ with $1 \leq j \leq k$ as \[ \mathbb{I}_{t,j,k} \equiv \tau \Rightarrow I'_{l',j,k} \]
-For each transition $t = (\ell, \tau, \ell') \in \mathcal{C}$ and number $k \in \mathbb{N}$ we define the consecution condition as \[ \mathbb{C}_{t,k} \equiv I_{\ell,k} \wedge \tau \Rightarrow I'_{\ell,k} \]
-The safety condition we define for an exit transition $t_\text{exit} = (\tilde{\ell}_\text{exit}, \tau_\text{exit}, \ell_\text{exit})$ as \[ \mathbb{S}_k \equiv I_{\tilde{\ell}_\text{exit},k} \wedge \tau_\text{exit} \Rightarrow \varphi' \]
 
-For instance for the SCC $\mathcal{C}_2$ and a $k=1$ the two initiation conditions are \[ \mathbb{I}_{t_2, 1, 1} \equiv i \geq x \Rightarrow i_{\ell_2,1} + i_{\ell_2,1,x} * x' + i_{\ell_2,1,y} * y' + i_{\ell_2,1,i} * i' \leq 0 \] and \[ \mathbb{I}_{t_4, 1, 1} \equiv y > x \Rightarrow i_{\ell_2,1} + i_{\ell_2,1,x} * x' + i_{\ell_2,1,y} * y' + i_{\ell_2,1,i} * i' \leq 0 \]
-The single consecution condition is
-\begin{multline}
-  \mathbb{C}_{t_5, 1} \equiv i_{\ell_2,1} + i_{\ell_2,1,x} * x + i_{\ell_2,1,y} * y + i_{\ell_2,1,i} * i \leq 0 \wedge x' = x + 1 \wedge y' = y + 1 \\
-  \Rightarrow i_{\ell_2,1} + i_{\ell_2,1,x} * x' + i_{\ell_2,1,y} * y' + i_{\ell_2,1,i} * i' \leq 0
-\end{multline}
-The single safety condition is
-\[ \mathbb{S}_1 \equiv i_{\ell_2,1} + i_{\ell_2,1,x} * x + i_{\ell_2,1,y} * y + i_{\ell_2,1,i} * i \leq 0 \wedge \text{true} \Rightarrow x' \neq y' \]
+With those templates we define the initiation condition for a transition $t = (\ell, \tau, \ell') \in \mathcal{E}_\mathcal{C}$ and numbers $j, k \in \mathbb{N}$ with $1 \leq j \leq k$ as $\mathbb{I}_{t,j,k}$.
+For each transition $t = (\ell, \tau, \ell') \in \mathcal{C}$ and number $k \in \mathbb{N}$ we define the consecution condition as $\mathbb{C}_{t,k}$.
+The safety condition we define for an exit transition $t_\text{exit} = (\tilde{\ell}_\text{exit}, \tau_\text{exit}, \ell_\text{exit})$ as $\mathbb{S}_k$.
+\begin{align}
+  \mathbb{I}_{t,j,k} \equiv & \tau \Rightarrow I'_{l',j,k}\\
+  \mathbb{C}_{t,k} \equiv & I_{\ell,k} \wedge \tau \Rightarrow I'_{\ell,k}\\
+  \mathbb{S}_k \equiv & I_{\tilde{\ell}_\text{exit},k} \wedge \tau_\text{exit} \Rightarrow \varphi'
+\end{align}
+
+For instance for the SCC $\mathcal{C}_2$ and $k=1$ the two initiation conditions are $\mathbb{I}_{t_2, 1, 1}$ and $\mathbb{I}_{t_4, 1, 1}$.
+The single consecution condition is $\mathbb{C}_{t_5, 1}$.
+The single safety condition is $\mathbb{S}_1$.
+\begin{align}
+  \mathbb{I}_{t_2, 1, 1} \equiv & i \geq x \Rightarrow i_{\ell_2,1} + i_{\ell_2,1,x} * x' + i_{\ell_2,1,y} * y' + i_{\ell_2,1,i} * i' \leq 0\\
+  \mathbb{I}_{t_4, 1, 1} \equiv & y > x \Rightarrow i_{\ell_2,1} + i_{\ell_2,1,x} * x' + i_{\ell_2,1,y} * y' + i_{\ell_2,1,i} * i' \leq 0\\
+  \begin{split}
+    \mathbb{C}_{t_5, 1} \equiv & i_{\ell_2,1} + i_{\ell_2,1,x} * x + i_{\ell_2,1,y} * y + i_{\ell_2,1,i} * i \leq 0 \wedge x' = x + 1 \wedge y' = y + 1\\
+    & \Rightarrow i_{\ell_2,1} + i_{\ell_2,1,x} * x' + i_{\ell_2,1,y} * y' + i_{\ell_2,1,i} * i' \leq 0
+  \end{split}\\
+  \mathbb{S}_1 \equiv & i_{\ell_2,1} + i_{\ell_2,1,x} * x + i_{\ell_2,1,y} * y + i_{\ell_2,1,i} * i \leq 0 \wedge \text{true} \Rightarrow x' \neq y'
+\end{align}
   
 Those templates for the three different conditions we can put together in a Max-SMT problem:
 \[ \mathbb{F}_k \equiv \bigwedge_{t \in \mathcal{C}} \mathbb{C}_{t, k} \wedge \mathbb{S}_k \wedge \bigwedge_{t \in \mathcal{E}_\mathcal{C}, 1 \leq j \leq k}{(\mathbb{I}_{t,j,k} \vee \neg p_{\mathbb{I}_{t,j,k}})} \wedge \bigwedge_{t \in \mathcal{E}_\mathcal{C}, 1 \leq j \leq k}{[p_{\mathbb{I}_{t,j,k}}, \omega_\mathbb{I}]} \]
