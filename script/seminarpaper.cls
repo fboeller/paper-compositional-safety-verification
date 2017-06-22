@@ -29,6 +29,8 @@
 
 \usepackage{tikz}
 \usetikzlibrary{arrows,decorations.pathmorphing,positioning,fit,trees,shapes,automata}
+\usepackage{pgf-umlsd}
+\usepgflibrary{arrows} % for pgf-umlsd
 
 \usepackage{listings}
 \lstset{language=C++}

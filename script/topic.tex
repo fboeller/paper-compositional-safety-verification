@@ -141,33 +141,36 @@ Therefore the other two paths both must ensure safety.
 The number of possible narrowing steps at $l_2$ is two in this example, but in more complex programs there can be an arbitrary number of narrowing steps necessary at a SCC.
 
 \begin{figure}
-\centering
-\begin{tikzpicture}[->,>=stealth',auto,node distance=2.5cm,
-    thick,
-    main node/.style={circle,draw,font=\sffamily\Large\bfseries},
-    aligned edge/.style={align=left}]
+  \centering
 
-  \node[main node] (0) {$\ell_2$};
-  \node[main node] (12) [below left of=0] {$\ell_1$};
-  \node[main node] (13) [below right of=0] {$\ell_0$};
-  \node[main node] (11) [left of=12] {$\ell_1$};
-  \node[main node] (14) [right of=13] {$\ell_0$};
-  \node[main node] (21) [below of=11] {$\ell_0$};
-  \node[main node] (22) [below of=12] {$\ell_0$};
+  \begin{sequencediagram}
+    \newinst{caller}{Caller}
+    \newinst[1.5]{c2}{$C_2$}
+    \newinst[3]{c1}{$C_1$}
+    \newinst[3]{c0}{$C_0$}
 
-  \node (start) [above of=0] {};
-  
-  \path[every node/.style={font=\sffamily\small}]
-    (start) edge node {$t_6$, $x \neq y$} (0)
-    (0) edge node[above left] {$t_4$, $x < y$} (11)
-    (0) edge node[right] {$t_4$, $y < x$} (12)
-    (0) edge node[below left] {$t_2$, $x < y$} (13)
-    (0) edge node[above right] {$t_2$, $y < x$} (14)
-    (11) edge node {$t_1$, TODO} (21)
-    (12) edge node {$t_1$, TODO} (22);
-\end{tikzpicture}
-\caption{Tree-like exploration of evaluations}
-\label{fig:backtrack}
+    \begin{call}{caller}{CheckSafe($t_6$, $x \neq y$)}{c2}{Safe}
+      \begin{call}{c2}{CondSafe($x \neq y$)}{c2}{$x > y$}\end{call}
+      \begin{call}{c2}{CheckSafe($t_2$, $x > y$)}{c0}{Maybe}
+        \begin{call}{c0}{CondSafe($x > y$)}{c0}{None}\end{call}
+      \end{call}
+      \begin{call}{c2}{CheckSafe($t_4$, $x > y$)}{c1}{Maybe}
+        \begin{call}{c1}{CondSafe($x > y$)}{c1}{$i > 0 \wedge x \geq y$}\end{call}
+        \begin{call}{c1}{CheckSafe($t_1$, $i > 0$)}{c0}{Safe}
+          \begin{call}{c0}{CondSafe($i > 0$)}{c0}{$i > 0$}\end{call}
+        \end{call}
+        \begin{call}{c1}{CheckSafe($t_1$, $x \geq y$)}{c0}{Safe}
+        \end{call}
+      \end{call}
+      \begin{call}{c2}{narrow()}{c2}{}\end{call}      
+      \begin{call}{c2}{CondSafe($x \neq y$)}{c2}{$y > x$}\end{call}
+      \begin{call}{c2}{CheckSafe($t_2$, $y > x$)}{c0}{Maybe}
+        \begin{call}{c0}{CondSafe($y > x$)}{c0}{Safe}\end{call}
+      \end{call}
+    \end{call}
+  \end{sequencediagram}
+
+  \caption{Sequence diagram for the example program}
 \end{figure}
 
 \subsubsection{Special cases of Narrowing}
