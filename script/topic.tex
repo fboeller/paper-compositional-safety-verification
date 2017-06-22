@@ -242,9 +242,8 @@ The single safety condition is
   
 Those templates for the three different conditions we can put together in a Max-SMT problem:
 \[ \mathbb{F}_k \equiv \bigwedge_{t \in \mathcal{C}} \mathbb{C}_{t, k} \wedge \mathbb{S}_k \wedge \bigwedge_{t \in \mathcal{E}_\mathcal{C}, 1 \leq j \leq k}{(\mathbb{I}_{t,j,k} \vee \neg p_{\mathbb{I}_{t,j,k}})} \wedge \bigwedge_{t \in \mathcal{E}_\mathcal{C}, 1 \leq j \leq k}{[p_{\mathbb{I}_{t,j,k}}, \omega_\mathbb{I}]} \]
-The propositional variables $p_{\mathbb{I}_{t,j,k}}$ get false if the initiation condition $\mathbb{I}_{t,j,k}$ is not satisfied.
-Therefore the related soft constraints does not need to be optimized anymore.
-\todo{Correct?}
+The propositional variables are necessary, because the Max-SMT-Solver is only able to maximize variables and no whole conditions.
+With the used formula we achieve that if $p_{\mathbb{I}_{t,j,k}}$ is decided to be true, the the initiation condition $\mathbb{I}_{t,j,k}$ also needs to be satisfied.
 
 For the example this is equal to:
 \[ \mathbb{F}_1 \equiv \mathbb{C}_{t_5, 1} \wedge \mathbb{S}_1 \wedge ((\mathbb{I}_{t_2,1,1} \vee \neg p_{\mathbb{I}_{t_2,1,1}}) \wedge (\mathbb{I}_{t_4,1,1} \vee \neg p_{\mathbb{I}_{t_4,1,1}})) \wedge ([p_{\mathbb{I}_{t_2,1,1}}, \omega_\mathbb{I}] \wedge [p_{\mathbb{I}_{t_4,1,1}}, \omega_\mathbb{I}]) \]
