@@ -5,7 +5,7 @@ In the previous chapter we covered the formal basics of a program graph and inva
 
 The algorithm uses a bottom-up approach. It analyses each component (SCC) of a program and combines the results.
 In a first step we will abstract from the analysis of the components, treat them as given and introduce the combination of the analysis to give an overview first.
-The analyser of the components is called CondSafe, while the overall combination is called CheckSafe.
+The analyzer of the components is called CondSafe, while the overall combination is called CheckSafe.
 
 \subsection{CheckSafe}
 
@@ -39,7 +39,7 @@ For the safety prove of $i > 0$ we need to inspect $C_0$.
 Since $C_0 = \emptyset$ CondSafe will detect that the postcondition has already to be met at the entry transitions, therefore the preconditions equal the postconditions.
 Because the only entry transition $t_0$ of $C_0$ implies $i > 0$, CondSafe proves the SCC as safe and propagates this result back to $C_2$.
 
-At this point CheckSafe knows that $x > y$ holds after every occurence of $t_4$ for every evaluation, but it does not hold for $t_2$.
+At this point CheckSafe knows that $x > y$ holds after every occurrence of $t_4$ for every evaluation, but it does not hold for $t_2$.
 Therefore we need to narrow the program and find the CII $y > x$ instead.
 Since we already found $t_4$ to be safe, we inspect $t_2$ with this CII.
 For the exit transition $t_2$ of $C_0$ the condition of the transition now implies the postcondition $y > x$.
@@ -135,7 +135,7 @@ The addition of narrowing has the effect of adding backtracking to the main algo
 It leads to a tree-like exploration from the exit state on to the initial states.
 Only if the exploration can successfully reach every initial state for each sequence of SCCs safety is guaranteed.
 This is shown by figure \ref{fig:backtrack}.
-For the example it is sufficient to explore the one of the leafes with $t_4$ in its path to the root and one of the leafes with $t_2$ in its path to the root.
+For the example it is sufficient to explore the one of the leaves with $t_4$ in its path to the root and one of the leaves with $t_2$ in its path to the root.
 The algorithm first detects $x < y$ as precondition of $l_2$, which we can not prove safe for neither of the two paths.
 Therefore the other two paths both must ensure safety.
 The number of possible narrowing steps at $l_2$ is two in this example, but in more complex programs there can be an arbitrary number of narrowing steps necessary at a SCC.
@@ -176,10 +176,10 @@ The number of possible narrowing steps at $l_2$ is two in this example, but in m
 \subsection{CondSafe}
 
 Another procedure the algorithm CheckSafe uses is the algorithm CondSafe.
-It analyses SCCs of the program and tries to find a conditional inductive invariant such that a post condition is implied.
+It analyses SCCs of the program and tries to find a CII such that a post condition is implied.
 
 For performance reasons it only takes a post condition which consists of a single clause.
-This is no real restriction, because each conjunction of conditions can be split into single transitions and be analyzed independently.
+This is not a real restriction, because each conjunction of conditions can be split into single transitions and be analyzed independently.
 
 The aim is to find an invariant that consists of as less conjunctions of clauses as possible.
 Therefore the algorithm uses an iterative approach.
@@ -204,7 +204,7 @@ The algorithm terminates if either an invariant with a specific count of clauses
 \end{algorithmic}
 \end{algorithm}
 
-To find a conditional inductive invariant with a certain size of clauses the algorithm uses a Max-SMT-Solver, which will be explained in the next chapter.
+To find a CII with a certain size of clauses the algorithm uses a Max-SMT-Solver, which will be explained in the next chapter.
 
 \subsubsection{Max-SMT}
 
@@ -220,8 +220,8 @@ A soft constraints does not have to be satisfied, but the solver will try to max
 
 Formally a Max-SMT problem is a formula $H_1 \wedge \dots \wedge H_n \wedge [S_1,\omega_1] \wedge \dots \wedge [S_m,\omega_m]$, where $H_i$ denote the hard clauses, which also occur in an SMT problem, and $[S_i,\omega_i]$ denote the soft clauses and their weight.
 
-To find conditional inductive invariants for program parts we create hard constraints for the consecution and safety conditions and a soft constraint for the initiation condition.
-While the consecution condition ensures that the invariant is inductive and the safety condition ensures the assertion is implied, the initiation condition does not need to be fulfilled and thus the resulting invariant might depend on additional preconditions.  
+To find CIIs for program parts we create hard constraints for the consecution and safety conditions and a soft constraint for the initiation condition.
+While the consecution condition ensures that the invariant is inductive and the safety condition ensures that the assertion is implied, the initiation condition does not need to be fulfilled and thus the resulting invariant might depend on additional preconditions.  
 
 In the definition of the condition we use for each location in the SCC the template \[ I_{\ell,k}(\mathcal{V}) \equiv \bigwedge_{1 \leq j \leq k}{I_{\ell,j,k}(\mathcal{V})} \] which is a conjunction of $k$ linear inequations \[ I_{\ell,j,k}(\mathcal{V}) \equiv i_{\ell,j} + \sum_{v \in \mathcal{V}}{i_{\ell,j,v} * v} \leq 0 \]
 For instance the template for the SCC $\mathcal{C}_2 = \lbrace t_5 \rbrace$ and a $k=1$ is \[ I_{\ell_2,1}(\lbrace x, y, i \rbrace) \equiv i_{\ell_2,1} + i_{\ell_2,1,x} * x + i_{\ell_2,1,y} * y + i_{\ell_2,1,i} * i \leq 0 \]
