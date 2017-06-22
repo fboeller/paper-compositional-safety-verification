@@ -74,17 +74,34 @@ Therefore this path is also proved safe.
 \subsection{Narrowing}
 
 Until this point we abstracted from the inner workings of narrowing.
-The idea of narrowing is to inspect a manipulated version of the original program, which enables the algorithm CondSafe to find an additional conditional inductive invariant.
-This invariant could then be used to prove safety for not yet shown evaluations.
+The idea of narrowing is to manipulate the original program, such that the algorithm CondSafe is able to find a different CII to show safety for not yet proved paths.
 In the example program it would be sufficient to show that the post condition $x > y$ holds after each evaluation step before the location $l_2$.
-But this can not be shown for both entry transitions.
+But this can not be shown for one entry transitions, therefore we try to use narrowing.
 
-We know by construction of the conditional invariant $x > y$ that each evaluation satisfying $x > y$ before entering $C_2$ is safe for the assertion.
-Thus we can exclude those evaluations from the original program.
-This is possible if we add to both entry transitions an additional clause $\neg (x > y)$ which is equivalent to $x \leq y$.
+\begin{algorithm}
+\caption{Narrowing}\label{narrowing}
+\begin{algorithmic}[1]
+  \ForAll {entry transitions}
+    \ForAll {literals of the CII}
+      \If {literal could not be proved safe for this transition}
+        \State Add a conjunct with the negated literal to the transition
+      \EndIf
+    \EndFor
+  \EndFor
+  \ForAll {transitions of the SCC}  
+    \State Add a conjunct with the negated CII at the start location to the transition
+    \State Add a conjunct with the negated CII at the end location to the transition
+  \EndFor
+\end{algorithmic}
+\end{algorithm}
+
+We exclude those evaluations we could not prove safe by adding the negated literals of the CII to those entry transitions that could not be proved safe for the literal.
+In the example program we add to $t_2$ the additional constraint $\neg (x > y)$ which is equivalent to $x \leq y$.
 This way we guarantee that no evaluation with $x > y$ at the entry transitions passes to $C_2$ and therefore they got excluded from the program.
+
 Additionally we can modify the transitions inside an SCC to exclude further evaluations, because $x > y$ is either true at the start location or at the end location of the transition.
-\todo{Correct?}
+\todo{Maybe add more explanation}
+
 After narrowing we obtain the program graph presented in figure \ref{fig:narrowed}. The added conditions are colored blue.
 
 \begin{figure}
@@ -122,24 +139,6 @@ For the example it is sufficient to explore the one of the leafes with $t_4$ in 
 The algorithm first detects $x < y$ as precondition of $l_2$, which we can not prove safe for neither of the two paths.
 Therefore the other two paths both must ensure safety.
 The number of possible narrowing steps at $l_2$ is two in this example, but in more complex programs there can be an arbitrary number of narrowing steps necessary at a SCC.
-
-\begin{algorithm}
-\caption{Narrowing}\label{narrowing}
-\begin{algorithmic}[1]
-  \ForAll {entry transitions}
-    \ForAll {literals of the CII}
-      \If {literal could not be proved safe for this transition}
-        \State Add a conjunct with the negated literal to the transition
-      \EndIf
-    \EndFor
-  \EndFor
-  \ForAll {transitions of the SCC}  
-    \State Add a conjunct with the negated CII at the start location to the transition
-    \State Add a conjunct with the negated CII at the end location to the transition
-  \EndFor
-\end{algorithmic}
-\end{algorithm}
-
 
 \begin{figure}
 \centering
