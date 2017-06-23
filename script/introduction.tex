@@ -8,7 +8,7 @@ Formally a program is safe for an assertion if every evaluation path of the prog
 While this definition describes a global analysis of the whole program, it is also possible to analyze components of a program and combine the results.
 The advantage of this compositional method is its scalability, but in many cases there is a loss in precision due to fewer information in the separated analysis.
 
-Since variables in a program can potentially be global and therefore a change of a variable at a location can have a huge impact on other parts of the program, it is not possible to analyze parts of the program completely independent. \todo{Example?}
+Since variables in a program can potentially be global and therefore a change of a variable at a location can have a huge impact on other parts of the program, it is not possible to analyze parts of the program completely independent.
 Therefore the presented algorithm analyses parts semi-independently, where the analysis of the parts gets combined and eventually reanalyzed.
 
 \subsection{Structure}
