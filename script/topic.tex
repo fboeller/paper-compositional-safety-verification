@@ -23,7 +23,7 @@ Therefore we can conclude that if we can show that prior to $C_2$ for every eval
 
 Unfortunately CondSafe is only able to find either the CII $x > y$ or $y > x$. This does not affect correctness since both CIIs imply $x \neq y$, but it affects completeness.
 Therefore the authors of the original paper introduced a technique they called narrowing.
-The idea behind narrowing is to try first to prove safety with the CII CondSafe returns.
+The idea behind narrowing is to first try to prove safety with the CII CondSafe returns.
 If this fails CheckSafe is then able to backtrack, filter evaluations and force CondSafe to return a different CII.
 
 We assume the analyzer finds the CII $x > y$ first.
@@ -45,7 +45,7 @@ The literals of both preconditions now get propagated independently to $C_0$.
 This is displayed by $\text{CheckSafe}(t_1, i > 0)$ and $\text{CheckSafe}(t_1, x \geq y)$ in the sequence diagram.
 $x \geq y$ is directly implied by the condition of $t_1$ and therefore this part of the CII is safe.
 For the safety prove of $i > 0$ we need to inspect $C_0$.
-Since $C_0 = \emptyset$ $\text{CondSafe}(i > 0)$ for the SCC will detect that the postcondition has already to be met at the entry transitions, therefore the preconditions equal the postconditions.
+Since $C_0$ does not contain any transition, $\text{CondSafe}(i > 0)$ for the SCC will detect that the postcondition has already to be met at the entry transitions, therefore the preconditions equal the postconditions.
 Because the only entry transition $t_0$ of $C_0$ implies $i > 0$, CondSafe proves the SCC as safe and propagates this result back to $C_2$.
 
 At this point CheckSafe knows that $x > y$ holds after every occurrence of $t_4$ for every evaluation, but it does not hold for $t_2$.
@@ -95,7 +95,7 @@ The algorithm terminates if either an invariant with a specific count of clauses
 
 \input{algorithms/condsafe.tex}
 
-To find a CII with a certain size of clauses the algorithm uses a Max-SMT-Solver, which will be explained in the next chapter.
+To find a CII with a certain size of clauses the algorithm uses a Max-SMT-Solver, which will be explained in the next section.
 
 \subsubsection{Max-SMT}
 
@@ -111,15 +111,15 @@ A soft constraints does not have to be satisfied, but the solver will try to max
 
 Formally a Max-SMT problem is a formula $H_1 \wedge \dots \wedge H_n \wedge [S_1,\omega_1] \wedge \dots \wedge [S_m,\omega_m]$, where $H_i$ denote the hard clauses, which also occur in an SMT problem, and $[S_i,\omega_i]$ denote the soft clauses and their weight.
 
-To find CIIs for program parts we create hard constraints for the consecution and safety conditions and a soft constraint for the initiation condition.
-While the consecution condition ensures that the invariant is inductive and the safety condition ensures that the assertion is implied, the initiation condition does not need to be fulfilled and thus the resulting invariant might depend on additional preconditions.  
+To find CIIs for program parts we create hard constraints for the consecution and safety conditions and soft constraints for the initiation conditions.
+While the consecution conditions ensure that the invariant is inductive and the safety conditions ensure that the assertion is implied, the initiation conditions do not need to be fulfilled and thus the resulting invariant might depend on additional preconditions.
 
 In the definition of the condition we use for each location in the SCC the templates $I_{\ell,k}$ and $I_{\ell,j,k}$, where $I_{\ell,k}$ is a conjunction of $k$ templates $I_{\ell,j,k}$.
 \begin{align}
   I_{\ell,k}(\mathcal{V}) \equiv & \bigwedge_{1 \leq j \leq k}{I_{\ell,j,k}(\mathcal{V})}\\
   I_{\ell,j,k}(\mathcal{V}) \equiv & i_{\ell,j} + \sum_{v \in \mathcal{V}}{i_{\ell,j,v} * v} \leq 0
 \end{align}
-For instance the template for the SCC $\mathcal{C}_2 = \lbrace t_5 \rbrace$ and a $k=1$ is \[ I_{\ell_2,1}(\lbrace x, y, i \rbrace) \equiv i_{\ell_2,1} + i_{\ell_2,1,x} * x + i_{\ell_2,1,y} * y + i_{\ell_2,1,i} * i \leq 0 \]
+For instance the template for the SCC $\mathcal{C}_2 = \lbrace t_5 \rbrace$ and $k=1$ is \[ I_{\ell_2,1}(\lbrace x, y, i \rbrace) \equiv i_{\ell_2,1} + i_{\ell_2,1,x} * x + i_{\ell_2,1,y} * y + i_{\ell_2,1,i} * i \leq 0 \]
 We write $I'_{\ell,k}$ instead of $I_{\ell,k}$ if we use $v' \in \mathcal{V}'$ instead of $v \in \mathcal{V}$.
 
 With those templates we define the initiation condition for a transition $t = (\ell, \tau, \ell') \in \mathcal{E}_\mathcal{C}$ and numbers $j, k \in \mathbb{N}$ with $1 \leq j \leq k$ as $\mathbb{I}_{t,j,k}$.
@@ -138,22 +138,21 @@ The single safety condition is $\mathbb{S}_1$.
   \mathbb{I}_{t_2, 1, 1} \equiv & i = 0 \wedge i' = i \wedge x' = x \wedge y' = y \Rightarrow I'_{\ell_2,1,1}\\
   \mathbb{I}_{t_4, 1, 1} \equiv & y > x \wedge i' = i \wedge x' = x \wedge y' = y \Rightarrow I'_{\ell_2,1,1}\\
   \mathbb{C}_{t_5, 1} \equiv & I_{\ell_2,1} \wedge x' = x + 1 \wedge y' = y + 1 \wedge i' = i \Rightarrow I'_{\ell_2,1}\\
-  \mathbb{S}_1 \equiv & I_{\ell_2,1} \wedge \text{true} \Rightarrow x' \neq y'
+  \mathbb{S}_1 \equiv & I_{\ell_2,1} \wedge i' = i \wedge x' = x \wedge y' = y \Rightarrow x' \neq y'
 \end{align}
   
 Those templates for the three different conditions we can put together in a Max-SMT problem:
 \[ \mathbb{F}_k \equiv \bigwedge_{t \in \mathcal{C}} \mathbb{C}_{t, k} \wedge \mathbb{S}_k \wedge \bigwedge_{t \in \mathcal{E}_\mathcal{C}, 1 \leq j \leq k}{(\mathbb{I}_{t,j,k} \vee \neg p_{\mathbb{I}_{t,j,k}})} \wedge \bigwedge_{t \in \mathcal{E}_\mathcal{C}, 1 \leq j \leq k}{[p_{\mathbb{I}_{t,j,k}}, \omega_\mathbb{I}]} \]
 The propositional variables are necessary, because the Max-SMT-Solver is only able to maximize variables and no whole conditions.
-With the used formula we achieve that if $p_{\mathbb{I}_{t,j,k}}$ is decided to be true, the the initiation condition $\mathbb{I}_{t,j,k}$ also needs to be satisfied.
+With the used formula we achieve that if $p_{\mathbb{I}_{t,j,k}}$ is decided to be true, the initiation condition $\mathbb{I}_{t,j,k}$ also needs to be satisfied.
 If the Max-SMT-Solver could maximize expressions, it would be possible to write
 \[ \mathbb{F}_k \equiv \bigwedge_{t \in \mathcal{C}} \mathbb{C}_{t, k} \wedge \mathbb{S}_k \wedge \bigwedge_{t \in \mathcal{E}_\mathcal{C}, 1 \leq j \leq k}{[\mathbb{I}_{t,j,k}, \omega_\mathbb{I}]} \]
-
 For the example the actual formula is equal to:
 \[ \mathbb{F}_1 \equiv \mathbb{C}_{t_5, 1} \wedge \mathbb{S}_1 \wedge ((\mathbb{I}_{t_2,1,1} \vee \neg p_{\mathbb{I}_{t_2,1,1}}) \wedge (\mathbb{I}_{t_4,1,1} \vee \neg p_{\mathbb{I}_{t_4,1,1}})) \wedge ([p_{\mathbb{I}_{t_2,1,1}}, \omega_\mathbb{I}] \wedge [p_{\mathbb{I}_{t_4,1,1}}, \omega_\mathbb{I}]) \]
 
 If we assume the Max-SMT-Solver returned $y > x$ as maximally satisfying condition for $\mathbb{F}_1$, we can verify if this is a model.
 The condition $y > x$ relates to the template instantiated with $I_{\ell,1}(\lbrace x, y, i \rbrace) \equiv 1 + (-1) * y + 1 * x + 0 * i \leq 0$.
-Inserted into the initiation, safety and consecution condition we get:
+Inserted into the initiation, safety and consecution conditions we get:
 \begin{align}
   \mathbb{I}_{t_2, 1, 1} \equiv & i = 0 \wedge i' = i \wedge x' = x \wedge y' = y \Rightarrow y' > x'\\
   \mathbb{I}_{t_4, 1, 1} \equiv & y > x \wedge i' = i \wedge x' = x \wedge y' = y \Rightarrow y' > x'\\

@@ -3,7 +3,7 @@
 
 After the informal introduction of the example program in the last chapter, this chapter will introduce formal definitions.
 In the first part there will be presented a formal definition of program graphs.
-In the second part different types of invariants, which are necessary for the analysis, will be introduced.
+In the second part there will be introduced different types of invariants, which are necessary for the analysis.
 
 \subsection{Program}
 
@@ -12,19 +12,19 @@ The example program uses the location set $\mathcal{L} = \lbrace \ell_0 , \ell_1
 
 We define $\mathcal{V} = \lbrace v_1, \dots, v_n \rbrace$ as the set of variables which occur in a program.
 We define $\mathcal{V}' = \lbrace v'_1, \dots, v'_n \rbrace$ as annotated variables to distinguish between previous and later values.
-In the example program there occur the variables $x$, $y$ and $i$.
+In the example program occur the variables $x$, $y$ and $i$.
 Their annotated versions are $x'$, $y'$ and $i'$.
 
 An evaluation $\upsilon: \mathcal{V} \rightarrow \mathbb{Z}$ assigns each program variable an integer value.
 A state $s = (\ell, \upsilon)$ represents the values of variables at a certain location $\ell \in \mathcal{L}$.
-A valid starting state in the example program could be for instance $(\ell_0, \upsilon_{[x \rightarrow 1, y \rightarrow 1, i \rightarrow 1]})$
+A valid starting state in the example program could be for instance $(\ell_0, \upsilon_{[x \rightarrow 1, y \rightarrow 1, i \rightarrow 1]})$.
 
 We denote with $\mathcal{F}(\mathcal{V})$ the set of formulas consisting of conjunctions of linear inequalities over the variables $\mathcal{V}$.
 We define a program as a directed graph consisting of the program locations $\mathcal{L}$ and a set of transitions $\mathcal{T} = \lbrace (\ell, \tau, \ell') \mid \ell, \ell' \in \mathcal{L}, \tau \in \mathcal{F}(\mathcal{V} \cup \mathcal{V}') \rbrace$ between those locations.
 If for a variable $v$ no assignment $v' = \dots$ is given, we assume the trivial assignment $v' = v$.
 The example program consists of seven transitions. The formal representation of $t_3$ is for instance $(\ell_1, i > 0 \wedge x' = x + 1 \wedge i' = i - 1 \wedge y' = y,\ell_1)$.
 
-An evaluation step with a transition $(\ell, \tau, \ell') \in \mathcal{T}$ leads a program state $(\ell, \upsilon)$ to another program state $(\ell', \upsilon')$ if and only if $\upsilon \models \tau$ and $\upsilon' \models \tau$. We then write $(\ell, \upsilon) \rightarrow_t (\ell', \upsilon')$.
+An evaluation step with a transition $t = (\ell, \tau, \ell') \in \mathcal{T}$ leads a program state $(\ell, \upsilon)$ to another program state $(\ell', \upsilon')$ if and only if $\upsilon \models \tau$ and $\upsilon' \models \tau$. We then write $(\ell, \upsilon) \rightarrow_t (\ell', \upsilon')$.
 For instance $(\ell_1,\upsilon_{[i \rightarrow 0, x \rightarrow 1, y \rightarrow 2]}) \rightarrow_{t_4} (\ell_2,\upsilon_{[i \rightarrow 0, x \rightarrow 1, y \rightarrow 2]})$ is a valid evaluation step in the program, while $(\ell_1,\upsilon_{[i \rightarrow 1, x \rightarrow 1, y \rightarrow 2]}) \rightarrow_{t_4} (\ell_2,\upsilon_{[i \rightarrow 1, x \rightarrow 1, y \rightarrow 2]})$ is not a valid evaluation step, since $i = 0$ does not hold for both evaluations.
 
 We define a program component $\mathcal{C} \subseteq \mathcal{T}$ as a strongly connected component (SCC) of a program.
@@ -36,8 +36,8 @@ Figure \ref{fig:sccs} shows the three SCCs and their entry transitions.
 
 \input{figures/sccs.tex}
 
-We define an assertion as a pair $(t, \phi)$ where $t \in T$ and $\phi \in \mathcal{F}(\mathcal{V})$.
-We say that a program is safe for an assertion if and only if $\forall (\ell_0, \upsilon_0): (\ell_0, \upsilon_0) \rightarrow_P^* \circ \rightarrow_t (\ell, \upsilon) \Rightarrow \upsilon \models \phi$.
+We define an assertion as a pair $(t, \varphi)$ where $t \in T$ and $\varphi \in \mathcal{F}(\mathcal{V})$.
+We say that a program is safe for an assertion if and only if $\forall (\ell_0, \upsilon_0): (\ell_0, \upsilon_0) \rightarrow_P^* \circ \rightarrow_t (\ell, \upsilon) \Rightarrow \upsilon \models \varphi$.
 We say that a program is conditional safe for an assertion if from a state where a precondition holds every path to an assertion also leads to the fulfillment of the assertion.
 The example program contains one assertion $(t_6, x \neq y)$. The goal is to show that the program is safe for this assertion. The algorithm uses the conditional safety property for this purpose.
 
@@ -47,8 +47,8 @@ An invariant is defined as an assignment $\mathcal{I} : \mathcal{L} \rightarrow 
 For instance a function with $\mathcal{I}(\ell) = x > 0$ for each location $\ell \in \mathcal{L}$ is an invariant.
 
 An invariant is inductive if and only if additionally it holds that $\top \models \mathcal{I}(\ell_0)$ and for all $(\ell, \tau, \ell') \in \mathcal{P}$ it holds that $\mathcal{I}(\ell) \wedge \tau \models \mathcal{I}(\ell')'$. We call the first initiation condition and the latter consecution condition.
-$\mathcal{I}$ with $\mathcal{I}(\ell_0) = i > 0$, $\mathcal{I}(\ell_1) = x > y \vee i > 0$ and $\mathcal{I}(\ell_2) = x \neq y$ is an inductive invariant of the example program as we will see.
+$\mathcal{I}$ with $\mathcal{I}(\ell_0) = i > 0$, $\mathcal{I}(\ell_1) = x > y \vee i > 0$ and $\mathcal{I}(\ell_2) = x \neq y$ is a valid inductive invariant of the example program.
 
 An invariant is an conditional inductive invariant if and only if for all $(\ell, \upsilon) \rightarrow_\mathcal{P} (\ell', \upsilon')$ it holds that $\upsilon \models \mathcal{Q}(\ell) \Rightarrow \upsilon' \models \mathcal{Q}(\ell')$.
 In contrast to inductive invariants those conditional inductive invariants does not hold from the program start on, but from a specific state on.
-We call conditional inductive invariants CII from this point on.
+We abbreviate the term conditional inductive invariant with CII from this point on.
