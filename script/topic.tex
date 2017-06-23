@@ -126,8 +126,8 @@ With those templates we define the initiation condition for a transition $t = (\
 For each transition $t = (\ell, \tau, \ell') \in \mathcal{C}$ and number $k \in \mathbb{N}$ we define the consecution condition as $\mathbb{C}_{t,k}$.
 The safety condition we define for an exit transition $t_\text{exit} = (\tilde{\ell}_\text{exit}, \tau_\text{exit}, \ell_\text{exit})$ as $\mathbb{S}_k$.
 \begin{align}
-  \mathbb{I}_{t,j,k} \equiv & \tau \Rightarrow I'_{l',j,k}\\
-  \mathbb{C}_{t,k} \equiv & I_{\ell,k} \wedge \tau \Rightarrow I'_{\ell,k}\\
+  \mathbb{I}_{t,j,k} \equiv & \tau \Rightarrow I'_{\ell',j,k}\\
+  \mathbb{C}_{t,k} \equiv & I_{\ell,k} \wedge \tau \Rightarrow I'_{\ell',k}\\
   \mathbb{S}_k \equiv & I_{\tilde{\ell}_\text{exit},k} \wedge \tau_\text{exit} \Rightarrow \varphi'
 \end{align}
 
@@ -135,33 +135,35 @@ For instance for the SCC $\mathcal{C}_2$ and $k=1$ the two initiation conditions
 The single consecution condition is $\mathbb{C}_{t_5, 1}$.
 The single safety condition is $\mathbb{S}_1$.
 \begin{align}
-  \mathbb{I}_{t_2, 1, 1} \equiv & i \geq x \Rightarrow i_{\ell_2,1} + i_{\ell_2,1,x} * x' + i_{\ell_2,1,y} * y' + i_{\ell_2,1,i} * i' \leq 0\\
-  \mathbb{I}_{t_4, 1, 1} \equiv & y > x \Rightarrow i_{\ell_2,1} + i_{\ell_2,1,x} * x' + i_{\ell_2,1,y} * y' + i_{\ell_2,1,i} * i' \leq 0\\
-  \begin{split}
-    \mathbb{C}_{t_5, 1} \equiv & i_{\ell_2,1} + i_{\ell_2,1,x} * x + i_{\ell_2,1,y} * y + i_{\ell_2,1,i} * i \leq 0 \wedge x' = x + 1 \wedge y' = y + 1\\
-    & \Rightarrow i_{\ell_2,1} + i_{\ell_2,1,x} * x' + i_{\ell_2,1,y} * y' + i_{\ell_2,1,i} * i' \leq 0
-  \end{split}\\
-  \mathbb{S}_1 \equiv & i_{\ell_2,1} + i_{\ell_2,1,x} * x + i_{\ell_2,1,y} * y + i_{\ell_2,1,i} * i \leq 0 \wedge \text{true} \Rightarrow x' \neq y'
+  \mathbb{I}_{t_2, 1, 1} \equiv & i = 0 \wedge i' = i \wedge x' = x \wedge y' = y \Rightarrow I'_{\ell_2,1,1}\\
+  \mathbb{I}_{t_4, 1, 1} \equiv & y > x \wedge i' = i \wedge x' = x \wedge y' = y \Rightarrow I'_{\ell_2,1,1}\\
+  \mathbb{C}_{t_5, 1} \equiv & I_{\ell_2,1} \wedge x' = x + 1 \wedge y' = y + 1 \wedge i' = i \Rightarrow I'_{\ell_2,1}\\
+  \mathbb{S}_1 \equiv & I_{\ell_2,1} \wedge \text{true} \Rightarrow x' \neq y'
 \end{align}
   
 Those templates for the three different conditions we can put together in a Max-SMT problem:
 \[ \mathbb{F}_k \equiv \bigwedge_{t \in \mathcal{C}} \mathbb{C}_{t, k} \wedge \mathbb{S}_k \wedge \bigwedge_{t \in \mathcal{E}_\mathcal{C}, 1 \leq j \leq k}{(\mathbb{I}_{t,j,k} \vee \neg p_{\mathbb{I}_{t,j,k}})} \wedge \bigwedge_{t \in \mathcal{E}_\mathcal{C}, 1 \leq j \leq k}{[p_{\mathbb{I}_{t,j,k}}, \omega_\mathbb{I}]} \]
 The propositional variables are necessary, because the Max-SMT-Solver is only able to maximize variables and no whole conditions.
 With the used formula we achieve that if $p_{\mathbb{I}_{t,j,k}}$ is decided to be true, the the initiation condition $\mathbb{I}_{t,j,k}$ also needs to be satisfied.
+If the Max-SMT-Solver could maximize expressions, it would be possible to write
+\[ \mathbb{F}_k \equiv \bigwedge_{t \in \mathcal{C}} \mathbb{C}_{t, k} \wedge \mathbb{S}_k \wedge \bigwedge_{t \in \mathcal{E}_\mathcal{C}, 1 \leq j \leq k}{[\mathbb{I}_{t,j,k}, \omega_\mathbb{I}]} \]
 
-For the example this is equal to:
+For the example the actual formula is equal to:
 \[ \mathbb{F}_1 \equiv \mathbb{C}_{t_5, 1} \wedge \mathbb{S}_1 \wedge ((\mathbb{I}_{t_2,1,1} \vee \neg p_{\mathbb{I}_{t_2,1,1}}) \wedge (\mathbb{I}_{t_4,1,1} \vee \neg p_{\mathbb{I}_{t_4,1,1}})) \wedge ([p_{\mathbb{I}_{t_2,1,1}}, \omega_\mathbb{I}] \wedge [p_{\mathbb{I}_{t_4,1,1}}, \omega_\mathbb{I}]) \]
 
-If we assume the Max-SMT-Solver returned $x > y$ as maximally satisfying condition for $\mathbb{F}_1$, we can verify if this is a model.
-The condition $x > y$ relates to the template instantiated with $I_{\ell,1}(\lbrace x, y, i \rbrace) \equiv 1 + (-1) * x + 1 * y + 0 * i \leq 0$.
+If we assume the Max-SMT-Solver returned $y > x$ as maximally satisfying condition for $\mathbb{F}_1$, we can verify if this is a model.
+The condition $y > x$ relates to the template instantiated with $I_{\ell,1}(\lbrace x, y, i \rbrace) \equiv 1 + (-1) * y + 1 * x + 0 * i \leq 0$.
 Inserted into the initiation, safety and consecution condition we get:
 \begin{align}
-  \mathbb{I}_{t_2, 1, 1} \equiv & i \geq x \Rightarrow x' > y'\\
-  \mathbb{I}_{t_4, 1, 1} \equiv & y > x \Rightarrow x' > y'\\
-  \mathbb{C}_{t_5, 1} \equiv & x > y \wedge x' = x + 1 \wedge y' = y + 1 \Rightarrow x' > y'\\
-  \mathbb{S}_1 \equiv & x > y \wedge \text{true} \Rightarrow x' \neq y'
+  \mathbb{I}_{t_2, 1, 1} \equiv & i = 0 \wedge i' = i \wedge x' = x \wedge y' = y \Rightarrow y' > x'\\
+  \mathbb{I}_{t_4, 1, 1} \equiv & y > x \wedge i' = i \wedge x' = x \wedge y' = y \Rightarrow y' > x'\\
+  \mathbb{C}_{t_5, 1} \equiv & y > x \wedge x' = x + 1 \wedge y' = y + 1 \wedge i' = i \Rightarrow y' > x'\\
+  \mathbb{S}_1 \equiv & y > x \wedge i' = i \wedge x' = x \wedge y' = y \Rightarrow x' \neq y'
 \end{align}
-
-\todo{Verify with example}
-
-\todo{Check formulas}
+The consecution and safety conditions we can simplify such that every model is still a model:
+\begin{align}
+  \mathbb{C}_{t_5, 1} \equiv & y > x \Rightarrow y + 1 > x + 1\\
+  \mathbb{S}_1 \equiv & y > x \Rightarrow x \neq y
+\end{align}
+We can directly see that both the consecution and the safety condition are valid.
+Since the initiation conditions does not need to be satisfied, $y > x$ can potentially be a result of the Max-SMT-Solver, if we assume that it is a maximal solution.
