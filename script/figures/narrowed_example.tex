@@ -16,7 +16,7 @@
     (0) edge[aligned edge] node {$t_1: x \geq y$} (1)
         edge[aligned edge, bend right=25] node [below] {$t_2: y > x \wedge \mathbf{x \leq y}$} (2)
     (1) edge[aligned edge, loop above] node {$t_3:$\\$i > 0 \wedge$\\$x' = x + 1 \wedge$\\$i' = i - 1$} (1)
-        edge[aligned edge] node {$t_4:$\\$i = 0$} (2)
+        edge[aligned edge] node {$t_4: i = 0$} (2)
     (2) edge[aligned edge, loop above] node {$t_5:$\\$x' = x + 1 \wedge$\\$y' = y + 1 \wedge$\\$\mathbf{x \leq y}$} (2)
         edge[aligned edge] node {$t_6$, assert($x \neq y$)} (4)
     (5) edge[aligned edge] node {$t_0: i > 0$} (0);

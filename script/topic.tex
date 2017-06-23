@@ -59,7 +59,7 @@ Therefore this path is also proved safe.
 \subsection{Narrowing}
 
 Until this point we abstracted from the inner workings of narrowing.
-The idea of narrowing is to manipulate the original program, such that the algorithm CondSafe is able to find a different CII to show safety for not yet proved paths.
+The idea of narrowing is to manipulate the original program, such that the algorithm CondSafe is able to find a different CII to show safety for not yet proved entries.
 In the example program it would be sufficient to show that the post condition $x > y$ holds after each evaluation step before the location $l_2$.
 But this can not be shown for one entry transitions, therefore we try to use narrowing.
 
@@ -70,21 +70,14 @@ In the example program we add to $t_2$ the additional constraint $\neg (x > y)$ 
 This way we guarantee that no evaluation with $x > y$ at the entry transitions passes to $C_2$ and therefore they got excluded from the program.
 
 Additionally we can modify the transitions inside an SCC to exclude further evaluations, because $x > y$ is either true at the start location or at the end location of the transition.
-\todo{Maybe add more explanation}
 
-After narrowing we obtain the program graph presented in figure \ref{fig:narrowed}. The added conditions are colored blue.
+After narrowing we obtain the program graph presented in figure \ref{fig:narrowed}. The added conditions are bold.
 
 \input{figures/narrowed_example.tex}
 
-The addition of narrowing has the effect of adding backtracking to the main algorithm.
-It leads to a tree-like exploration from the exit state on to the initial states.
-Only if the exploration can successfully reach every initial state for each sequence of SCCs safety is guaranteed.
-Figure \ref{fig:sequence} \todo{Go on}
-
-For the example it is sufficient to explore the one of the leaves with $t_4$ in its path to the root and one of the leaves with $t_2$ in its path to the root.
-The algorithm first detects $x < y$ as precondition of $l_2$, which we can not prove safe for neither of the two paths.
-Therefore the other two paths both must ensure safety.
-The number of possible narrowing steps at $l_2$ is two in this example, but in more complex programs there can be an arbitrary number of narrowing steps necessary at a SCC.
+The addition of narrowing has the effect of adding an additional layer of backtracking to the main algorithm.
+Without narrowing CheckSafe already uses a tree-like exploration from the exit state on to the initial states.
+Narrowing adds even more possible calls to CheckSafe at each step of the algorithm.
 
 \subsection{CondSafe}
 
