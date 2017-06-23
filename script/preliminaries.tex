@@ -47,7 +47,7 @@ An invariant is defined as an assignment $\mathcal{I} : \mathcal{L} \rightarrow 
 For instance a function with $\mathcal{I}(\ell) = x > 0$ for each location $\ell \in \mathcal{L}$ is an invariant.
 
 An invariant is inductive if and only if additionally it holds that $\top \models \mathcal{I}(\ell_0)$ and for all $(\ell, \tau, \ell') \in \mathcal{P}$ it holds that $\mathcal{I}(\ell) \wedge \tau \models \mathcal{I}(\ell')'$. We call the first initiation condition and the latter consecution condition.
-$\mathcal{I}$ with $\mathcal{I}(\ell_0) = x > 0 \wedge y > 0 \wedge i = 0$, $\mathcal{I}(\ell_1) = x > 0 \wedge y > 0 \wedge x \geq y \wedge i \geq 0$ and $\mathcal{I}(\ell_2) = x \neq y$ \todo{Check} is an inductive invariant of the example program as we will see.
+$\mathcal{I}$ with $\mathcal{I}(\ell_0) = i > 0$, $\mathcal{I}(\ell_1) = x > y \vee i > 0$ and $\mathcal{I}(\ell_2) = x \neq y$ is an inductive invariant of the example program as we will see.
 
 An invariant is an conditional inductive invariant if and only if for all $(\ell, \upsilon) \rightarrow_\mathcal{P} (\ell', \upsilon')$ it holds that $\upsilon \models \mathcal{Q}(\ell) \Rightarrow \upsilon' \models \mathcal{Q}(\ell')$.
 In contrast to inductive invariants those conditional inductive invariants does not hold from the program start on, but from a specific state on.
