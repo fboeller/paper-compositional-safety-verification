@@ -12,12 +12,12 @@
       \begin{call}{c2}{CheckSafe($t_2$, $x > y$)}{c0}{Maybe}
         \begin{call}{c0}{CondSafe($x > y$)}{c0}{None}\end{call}
       \end{call}
-      \begin{call}{c2}{CheckSafe($t_4$, $x > y$)}{c1}{Maybe}
+      \begin{call}{c2}{CheckSafe($t_4$, $x > y$)}{c1}{Safe}
         \begin{call}{c1}{CondSafe($x > y$)}{c1}{$i > 0 \wedge x \geq y$}\end{call}
+        \begin{call}{c1}{CheckSafe($t_1$, $x \geq y$)}{c0}{Safe}
+        \end{call}
         \begin{call}{c1}{CheckSafe($t_1$, $i > 0$)}{c0}{Safe}
           \begin{call}{c0}{CondSafe($i > 0$)}{c0}{$i > 0$}\end{call}
-        \end{call}
-        \begin{call}{c1}{CheckSafe($t_1$, $x \geq y$)}{c0}{Safe}
         \end{call}
       \end{call}
       \begin{call}{c2}{narrow()}{c2}{}\end{call}      
@@ -29,4 +29,5 @@
   \end{sequencediagram}
 
   \caption{Sequence diagram for the example program}
+  \label{fig:sequence}
 \end{figure}
