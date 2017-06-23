@@ -9,16 +9,16 @@ While this definition describes a global analysis of the whole program, it is al
 The advantage of this compositional method is its scalability, but in many cases there is a loss in precision due to fewer information in the separated analysis.
 
 Since variables in a program can potentially be global and therefore a change of a variable at a location can have a huge impact on other parts of the program, it is not possible to analyze parts of the program completely independent.
-Therefore the presented algorithm analyses parts semi-independently, where the analysis of the parts gets combined and eventually reanalyzed.
+Therefore the presented algorithm analyzes parts semi-independently, where the analysis of the parts gets combined and eventually reanalyzed.
 
 \subsection{Structure}
 
-This paper aims at explaining the algorithm for compositional safety verification with a single example.
+This paper aims at explaining the various distinctions of cases of the algorithm for compositional safety verification with a single example.
 In the next section of this chapter this example will be presented.
-The following chapter will cover formal definitions of program graphs and invariants and illustrate them by the presented example.
+The following chapter will cover formal definitions of program graphs and invariants and illustrate them with the presented example.
 
 The third chapter will introduce the algorithm. 
-At first an overview over the basic analysis of a whole program will be given and explained by the example, after that narrowing and the analysis of components will be explained.
+At first an overview over the basic analysis of a whole program will be given and explained with the example, after that narrowing and the analysis of components will be explained.
 For the analysis of components Max-SMT-Solving, an extension of SMT-Solving, will be introduced.
 
 In the end a summary of the method will be given.
@@ -30,7 +30,7 @@ In the end a summary of the method will be given.
 To show the inner workings of the algorithm, we will use a single example and explain based on that the different techniques of the algorithm.
 
 The example program is shown in \ref{fig:example}.
-It has three input parameters $x>0$, $y>0$ and $i>0$.
+It has three input parameters $x$, $y$ and $i>0$.
 The task of the safety verification is to assure, that after every possible evaluation $x \neq y$ holds.
 
 We can easily show this property of the program intentionally:
@@ -39,4 +39,4 @@ With every iteration with $t_5$ also $y+1>x+1$ holds and therefore $x \neq y$ ho
 Starting at $l_0$ we can also move to $l_1$ if $x \geq y$.
 Since $i>0$ we must use $t_3$ at least one time before moving on to $l_2$.
 Since $t_3$ increments the value of $x$, $x > y$ holds after one usage of $t_3$.
-Again $t_5$ can not change the relation between $x$ and $y$ and therefore $x \neq y$ holds also for this case.
+Again $t_5$ can not change the relation between $x$ and $y$ and therefore $x \neq y$ also holds for this case.

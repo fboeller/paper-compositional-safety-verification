@@ -3,7 +3,7 @@
 
 In the previous chapter we covered the formal basics of a program graph and invariants and introduced an example graph, which we will inspect in this chapter.
 
-The algorithm uses a bottom-up approach. It analyses each component (SCC) of a program and combines the results.
+The algorithm uses a bottom-up approach. It analyzes each component (SCC) of a program and combines the results.
 In a first step we will abstract from the analysis of the components, treat them as given and introduce the combination of the analysis to give an overview first.
 The analyzer of the components is called CondSafe, while the overall combination is called CheckSafe.
 
@@ -82,7 +82,7 @@ Narrowing adds even more possible calls to CheckSafe at each step of the algorit
 \subsection{CondSafe}
 
 Another procedure the algorithm CheckSafe uses is the algorithm CondSafe.
-It analyses SCCs of the program and tries to find a CII such that a post condition is implied.
+It analyzes SCCs of the program and tries to find a CII such that a post condition is implied.
 
 For performance reasons it only takes a post condition which consists of a single clause.
 This is not a real restriction, because each conjunction of conditions can be split into single transitions and be analyzed independently.
