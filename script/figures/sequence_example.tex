@@ -1,0 +1,32 @@
+\begin{figure}
+  \centering
+
+  \begin{sequencediagram}
+    \newinst{caller}{Caller}
+    \newinst[1.5]{c2}{$C_2$}
+    \newinst[3]{c1}{$C_1$}
+    \newinst[3]{c0}{$C_0$}
+
+    \begin{call}{caller}{CheckSafe($t_6$, $x \neq y$)}{c2}{Safe}
+      \begin{call}{c2}{CondSafe($x \neq y$)}{c2}{$x > y$}\end{call}
+      \begin{call}{c2}{CheckSafe($t_2$, $x > y$)}{c0}{Maybe}
+        \begin{call}{c0}{CondSafe($x > y$)}{c0}{None}\end{call}
+      \end{call}
+      \begin{call}{c2}{CheckSafe($t_4$, $x > y$)}{c1}{Maybe}
+        \begin{call}{c1}{CondSafe($x > y$)}{c1}{$i > 0 \wedge x \geq y$}\end{call}
+        \begin{call}{c1}{CheckSafe($t_1$, $i > 0$)}{c0}{Safe}
+          \begin{call}{c0}{CondSafe($i > 0$)}{c0}{$i > 0$}\end{call}
+        \end{call}
+        \begin{call}{c1}{CheckSafe($t_1$, $x \geq y$)}{c0}{Safe}
+        \end{call}
+      \end{call}
+      \begin{call}{c2}{narrow()}{c2}{}\end{call}      
+      \begin{call}{c2}{CondSafe($x \neq y$)}{c2}{$y > x$}\end{call}
+      \begin{call}{c2}{CheckSafe($t_2$, $y > x$)}{c0}{Maybe}
+        \begin{call}{c0}{CondSafe($y > x$)}{c0}{Safe}\end{call}
+      \end{call}
+    \end{call}
+  \end{sequencediagram}
+
+  \caption{Sequence diagram for the example program}
+\end{figure}

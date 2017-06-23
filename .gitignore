@@ -6,3 +6,4 @@ script/main.log
 script/main.pdf
 script/main.out
 VeryMax
+*.aux

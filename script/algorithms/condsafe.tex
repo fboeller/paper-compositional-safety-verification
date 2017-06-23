@@ -1,0 +1,16 @@
+\begin{algorithm}
+\caption{CondSafe}\label{condsafe}
+\begin{algorithmic}[1]
+\State Input: An SCC, the entry transitions of the SCC, an exit transition with an assertion
+\State $k \gets 1$
+\Repeat
+  \State Construct a formula $\mathbb{F}_k$ for the SCC and the assertion
+  \State Call the Max-SMT-Solver with $\mathbb{F}_k$
+  \If {it returned a solution}
+    \Return an invariant assigning each location the according condition from $\mathbb{F}_k$
+  \EndIf
+  \State $k \gets k + 1$
+\Until{$k > \text{MAX\_CONJUNCTS}$}
+\Return None
+\end{algorithmic}
+\end{algorithm}

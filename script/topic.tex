@@ -45,31 +45,7 @@ Since we already found $t_4$ to be safe, we inspect $t_2$ with this CII.
 For the exit transition $t_2$ of $C_0$ the condition of the transition now implies the postcondition $y > x$.
 Therefore this path is also proved safe.
 
-\begin{algorithm}
-\caption{CheckSafe}\label{checksafe}
-\begin{algorithmic}[1]
-  \State Input: The program, an SCC, the entry transitions of the SCC, an exit transition with an assertion
-  \If {the exit transition already implies the assertion}
-    \Return Safe
-  \ElsIf {the exit transition is an initial transition}
-    \Return Maybe
-  \EndIf
-  \State Call CondSafe for the SCC with the given assertion
-  \If {no CII could be found}
-    \Return Maybe
-  \EndIf
-  \ForAll {entry SCCs}
-    \ForAll {literals of the according condition of the CII}
-      \State Call CheckSafe for the entry SCC and with the literal as assertion
-    \EndFor
-  \EndFor
-  \If {all calls returned Safe}
-    \Return Safe
-  \EndIf
-  \Return the result of a call to CheckSafe with a narrowed version
-\end{algorithmic}
-\end{algorithm}
-
+\input{algorithms/checksafe.tex}
 
 \subsection{Narrowing}
 
@@ -78,22 +54,7 @@ The idea of narrowing is to manipulate the original program, such that the algor
 In the example program it would be sufficient to show that the post condition $x > y$ holds after each evaluation step before the location $l_2$.
 But this can not be shown for one entry transitions, therefore we try to use narrowing.
 
-\begin{algorithm}
-\caption{Narrowing}\label{narrowing}
-\begin{algorithmic}[1]
-  \ForAll {entry transitions}
-    \ForAll {literals of the CII}
-      \If {literal could not be proved safe for this transition}
-        \State Add a conjunct with the negated literal to the transition
-      \EndIf
-    \EndFor
-  \EndFor
-  \ForAll {transitions of the SCC}  
-    \State Add a conjunct with the negated CII at the start location to the transition
-    \State Add a conjunct with the negated CII at the end location to the transition
-  \EndFor
-\end{algorithmic}
-\end{algorithm}
+\input{algorithms/narrowing.tex}
 
 We exclude those evaluations we could not prove safe by adding the negated literals of the CII to those entry transitions that could not be proved safe for the literal.
 In the example program we add to $t_2$ the additional constraint $\neg (x > y)$ which is equivalent to $x \leq y$.
@@ -104,32 +65,7 @@ Additionally we can modify the transitions inside an SCC to exclude further eval
 
 After narrowing we obtain the program graph presented in figure \ref{fig:narrowed}. The added conditions are colored blue.
 
-\begin{figure}
-\centering
-\begin{tikzpicture}[->,>=stealth',auto,node distance=3.5cm,
-    thick,
-    main node/.style={circle,draw,font=\sffamily\Large\bfseries},
-    aligned edge/.style={align=left}]
-
-  \node[main node] (0) {$l_0$};
-  \node[main node] (1) [right of=0] {$l_1$};
-  \node[main node] (2) [right of=1] {$l_2$};
-
-  \node (4) [right of=2] {};
-  \node (5) [left of=0] {};
-  
-  \path[every node/.style={font=\sffamily\small}]
-    (0) edge[aligned edge] node {$t_1: x \geq y$} (1)
-        edge[aligned edge, bend right=25] node [below] {$t_2: y > x \wedge \mathbf{x \leq y}$} (2)
-    (1) edge[aligned edge, loop above] node {$t_3:$\\$i > 0 \wedge$\\$x' = x + 1 \wedge$\\$i' = i - 1$} (1)
-        edge[aligned edge] node {$t_4:$\\$i = 0$} (2)
-    (2) edge[aligned edge, loop above] node {$t_5:$\\$x' = x + 1 \wedge$\\$y' = y + 1 \wedge$\\$\mathbf{x \leq y}$} (2)
-        edge[aligned edge] node {$t_6$, assert($x \neq y$)} (4)
-    (5) edge[aligned edge] node {$t_0: i > 0$} (0);
-\end{tikzpicture}
-\caption{Narrowed example program}
-\label{fig:narrowed}
-\end{figure}
+\input{figures/narrowed_example.tex}
 
 The addition of narrowing has the effect of adding backtracking to the main algorithm.
 It leads to a tree-like exploration from the exit state on to the initial states.
@@ -140,38 +76,7 @@ The algorithm first detects $x < y$ as precondition of $l_2$, which we can not p
 Therefore the other two paths both must ensure safety.
 The number of possible narrowing steps at $l_2$ is two in this example, but in more complex programs there can be an arbitrary number of narrowing steps necessary at a SCC.
 
-\begin{figure}
-  \centering
-
-  \begin{sequencediagram}
-    \newinst{caller}{Caller}
-    \newinst[1.5]{c2}{$C_2$}
-    \newinst[3]{c1}{$C_1$}
-    \newinst[3]{c0}{$C_0$}
-
-    \begin{call}{caller}{CheckSafe($t_6$, $x \neq y$)}{c2}{Safe}
-      \begin{call}{c2}{CondSafe($x \neq y$)}{c2}{$x > y$}\end{call}
-      \begin{call}{c2}{CheckSafe($t_2$, $x > y$)}{c0}{Maybe}
-        \begin{call}{c0}{CondSafe($x > y$)}{c0}{None}\end{call}
-      \end{call}
-      \begin{call}{c2}{CheckSafe($t_4$, $x > y$)}{c1}{Maybe}
-        \begin{call}{c1}{CondSafe($x > y$)}{c1}{$i > 0 \wedge x \geq y$}\end{call}
-        \begin{call}{c1}{CheckSafe($t_1$, $i > 0$)}{c0}{Safe}
-          \begin{call}{c0}{CondSafe($i > 0$)}{c0}{$i > 0$}\end{call}
-        \end{call}
-        \begin{call}{c1}{CheckSafe($t_1$, $x \geq y$)}{c0}{Safe}
-        \end{call}
-      \end{call}
-      \begin{call}{c2}{narrow()}{c2}{}\end{call}      
-      \begin{call}{c2}{CondSafe($x \neq y$)}{c2}{$y > x$}\end{call}
-      \begin{call}{c2}{CheckSafe($t_2$, $y > x$)}{c0}{Maybe}
-        \begin{call}{c0}{CondSafe($y > x$)}{c0}{Safe}\end{call}
-      \end{call}
-    \end{call}
-  \end{sequencediagram}
-
-  \caption{Sequence diagram for the example program}
-\end{figure}
+\input{figures/sequence_example.tex}
 
 \subsection{CondSafe}
 
@@ -187,22 +92,7 @@ In a first step it tries to find an invariant consisting of a single clause.
 If this is not possible, it expands its search spectrum and searches for clauses consisting of two clauses.
 The algorithm terminates if either an invariant with a specific count of clauses is found or a certain constant is reached.
 
-\begin{algorithm}
-\caption{CondSafe}\label{condsafe}
-\begin{algorithmic}[1]
-\State Input: An SCC, the entry transitions of the SCC, an exit transition with an assertion
-\State $k \gets 1$
-\Repeat
-  \State Construct a formula $\mathbb{F}_k$ for the SCC and the assertion
-  \State Call the Max-SMT-Solver with $\mathbb{F}_k$
-  \If {it returned a solution}
-    \Return an invariant assigning each location the according condition from $\mathbb{F}_k$
-  \EndIf
-  \State $k \gets k + 1$
-\Until{$k > \text{MAX\_CONJUNCTS}$}
-\Return None
-\end{algorithmic}
-\end{algorithm}
+\input{algorithms/condsafe.tex}
 
 To find a CII with a certain size of clauses the algorithm uses a Max-SMT-Solver, which will be explained in the next chapter.
 

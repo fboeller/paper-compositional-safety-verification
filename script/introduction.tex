@@ -25,32 +25,7 @@ In the end a summary of the method will be given.
 
 \subsection{Example program}
 
-\begin{figure}
-\centering
-\begin{tikzpicture}[->,>=stealth',auto,node distance=3.5cm,
-    thick,
-    main node/.style={circle,draw,font=\sffamily\Large\bfseries},
-    aligned edge/.style={align=left}]
-
-  \node[main node] (0) {$l_0$};
-  \node[main node] (1) [right of=0] {$l_1$};
-  \node[main node] (2) [right of=1] {$l_2$};
-
-  \node (4) [right of=2] {};
-  \node (5) [left of=0] {};
-
-  \path[every node/.style={font=\sffamily\small}]
-    (0) edge[aligned edge] node {$t_1: x \geq y$} (1)
-        edge[aligned edge, bend right=25] node [below] {$t_2: y > x$} (2)
-    (1) edge[aligned edge, loop above] node {$t_3:$\\$i > 0 \wedge$\\$x' = x + 1 \wedge$\\$i' = i - 1$} (1)
-        edge[aligned edge] node {$t_4: i = 0$} (2)
-    (2) edge[aligned edge, loop above] node {$t_5:$\\$x' = x + 1 \wedge$\\$y' = y + 1$} (2)
-        edge[aligned edge] node {$t_6$, assert($x \neq y$)} (4)
-    (5) edge[aligned edge] node {$t_0: i > 0$} (0);
-\end{tikzpicture}
-\caption{Example program}
-\label{fig:example}
-\end{figure}
+\input{figures/example.tex}
 
 To show the inner workings of the algorithm, we will use a single example and explain based on that the different techniques of the algorithm.
 

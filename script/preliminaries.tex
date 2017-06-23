@@ -34,32 +34,7 @@ The example program contains three SCCs. Every location represents in this case 
 The entry transitions of those SCCs are $\mathcal{E}_{\mathcal{C}_0} = \lbrace t_0 \rbrace$, $\mathcal{E}_{\mathcal{C}_1} = \lbrace t_1 \rbrace$ and $\mathcal{E}_{\mathcal{C}_2} = \lbrace t_2, t_4 \rbrace$.
 Figure \ref{fig:sccs} shows the three SCCs and their entry transitions.
 
-\begin{figure}
-\centering
-\begin{tikzpicture}[->,>=stealth',auto,node distance=3.5cm,
-    thick,
-    main node/.style={circle,draw,font=\sffamily\Large\bfseries},
-    aligned edge/.style={align=left}]
-
-  \node[main node, very thick, densely dotted] (0) {$l_0$};
-  \node[main node, very thick, solid] (1) [right of=0] {$l_1$};
-  \node[main node, densely dashed, very thick] (2) [right of=1] {$l_2$};
-
-  \node (4) [right of=2] {};
-  \node (5) [left of=0] {};
-
-  \path[every node/.style={font=\sffamily\small}]
-    (0) edge[solid, thin] node {$t_1$} (1)
-        edge[loosely dashed, thin, bend right=25] node [below] {$t_2$} (2)
-    (1) edge[solid, very thick, loop above] node {$t_3$} (1)
-        edge[loosely dashed, thin] node {$t_4$} (2)
-    (2) edge[densely dashed, very thick, loop above] node {$t_5$} (2)
-        edge node {$t_6$} (4)
-    (5) edge[loosely dotted] node {$t_0$} (0);
-\end{tikzpicture}
-\caption{The example program with the SCCs and entry transitions marked}
-\label{fig:sccs}
-\end{figure}
+\input{figures/sccs.tex}
 
 We define an assertion as a pair $(t, \phi)$ where $t \in T$ and $\phi \in \mathcal{F}(\mathcal{V})$.
 We say that a program is safe for an assertion if and only if $\forall (\ell_0, \upsilon_0): (\ell_0, \upsilon_0) \rightarrow_P^* \circ \rightarrow_t (\ell, \upsilon) \Rightarrow \upsilon \models \phi$.
