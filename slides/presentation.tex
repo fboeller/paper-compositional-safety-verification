@@ -59,8 +59,32 @@
 %\setbeamertemplate{navigation symbols}{} % To remove the navigation symbols from the bottom of all slides uncomment this line
 }
 
-\usepackage{graphicx} % Allows including images
-\usepackage{booktabs} % Allows the use of \toprule, \midrule and \bottomrule in tables
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+% \usepackage[ngerman]{babel}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+
+\let\oldReturn\Return
+\renewcommand{\Return}{\State\oldReturn}
+
+\usepackage{tikz}
+\usetikzlibrary{arrows,decorations.pathmorphing,positioning,fit,trees,shapes,automata}
+\usepackage{pgf-umlsd}
+\usepgflibrary{arrows} % for pgf-umlsd
+
+\tikzset{onslide/.code args={<#1>#2}{%
+  \only<#1>{\pgfkeysalso{#2}} % \pgfkeysalso doesn't change the path
+}}
+
+\usepackage{listings}
 
 %----------------------------------------------------------------------------------------
 %	TITLE PAGE
@@ -68,14 +92,14 @@
 
 \title[Compositional safety verification]{On Compositional safety verification with Max-SMT} % The short title appears at the bottom of every slide, the full title is only on the title page
 
-\author{Fabian B\"{o}ller} % Your name
+\author{Author: Fabian B\"{o}ller \\ Supervision: David Korzeniewski} % Your name
 \institute[i2] % Your institution as it will appear on the bottom of every slide, may be shorthand to save space
 {
 RWTH Aachen \\ % Your institution for the title page
 \medskip
 \textit{fabian.boeller@rwth-aachen.de} % Your email address
 }
-\date{\today} % Date, can be changed to a custom date
+\date{SS 2017} % Date, can be changed to a custom date
 
 \begin{document}
 
@@ -92,6 +116,161 @@ RWTH Aachen \\ % Your institution for the title page
 %	PRESENTATION SLIDES
 %----------------------------------------------------------------------------------------
 
+\section{Example execution}
+
+\begin{frame}
+  \frametitle{Example program}
+  \begin{figure}
+    \centering
+    \begin{tikzpicture}[->,>=stealth',auto,node distance=3cm,
+        thick,
+        main node/.style={circle,draw,font=\sffamily\Large\bfseries},
+        aligned edge/.style={align=left}]
+      
+      \node[main node] (0) {$l_0$};
+      \node[main node] (1) [right of=0] {$l_1$};
+      \node[main node] (2) [right of=1] {$l_2$};
+      
+      \node (4) [right of=2] {};
+      \node (5) [left of=0] {};
+      
+      \path[every node/.style={font=\sffamily\small}]
+      (0) edge[aligned edge] node {$t_1: x \geq y$} (1)
+      edge[aligned edge, bend right=25] node [below] {$t_2: y > x$} (2)
+      (1) edge[aligned edge, loop above] node {$t_3:$\\$i > 0 \wedge$\\$x' = x + 1 \wedge$\\$i' = i - 1$} (1)
+      edge[aligned edge] node {$t_4: i = 0$} (2)
+      (2) edge[aligned edge, loop above] node {$t_5:$\\$x' = x + 1 \wedge$\\$y' = y + 1$} (2)
+      edge[aligned edge] node {$t_6$, assert($x \neq y$)} (4)
+      (5) edge[aligned edge] node {$t_0: i > 0$} (0);
+    \end{tikzpicture}
+  \end{figure}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Example execution}
+  \begin{figure}
+    \centering
+    \begin{tikzpicture}[->,>=stealth',auto,node distance=3cm,
+        thick,
+        main node/.style={circle,draw,font=\sffamily\Large\bfseries},
+        aligned edge/.style={align=left},
+        inspect/.style={draw=blue, text=blue},
+        safe/.style={draw=green, text=green},
+        maybe/.style={draw=orange, text=orange}]
+      
+      \node[main node, onslide={<8-9>inspect}, onslide={<10>safe}] (0) {$l_0$};
+      \node[main node, onslide={<6-10>inspect}, onslide={<11>safe}] (1) [right of=0] {$l_1$};
+      \node[main node, onslide={<2-14>inspect}, onslide={<15>safe}] (2) [right of=1] {$l_2$};
+      
+      \node (4) [right of=2] {};
+      \node (5) [left of=0] {};
+      
+      \path[every node/.style={font=\sffamily\small}]
+      (0) edge[aligned edge, onslide={<7-10>inspect}, onslide={<11>safe}] node {$t_1: x \geq y$} (1)
+      edge[aligned edge, bend right=25, onslide={<3>inspect}, onslide={<4-12>maybe}, onslide={<13>inspect}, onslide={<14>safe}] node [below] {$t_2: y > x$\\\only<13->{$\wedge \mathbf{x \leq y}$}} (2)
+      (1) edge[aligned edge, loop above, onslide={<6-10>inspect}, onslide={<11>safe}] node {$t_3:$\\$i > 0 \wedge$\\$x' = x + 1 \wedge$\\$i' = i - 1$} (1)
+      edge[aligned edge, onslide={<5-11>inspect}, onslide={<12-14>safe}] node {$t_4: i = 0$} (2)
+      (2) edge[aligned edge, loop above, onslide={<2-14>inspect}, onslide={<15>safe}] node {$t_5:$\\$x' = x + 1 \wedge$\\$y' = y + 1$\\\only<13->{$\wedge \mathbf{x \leq y}$}} (2)
+      edge[aligned edge, onslide={<1-15>inspect}, onslide={<16>safe}] node {$t_6$, assert($x \neq y$)} (4)
+      (5) edge[aligned edge, onslide={<9>inspect}, onslide={<10>safe}] node {$t_0: i > 0$} (0);
+    \end{tikzpicture}
+  \end{figure}
+\end{frame}
+
+
+\begin{frame}
+
+\begin{figure}
+  \centering
+
+  \begin{sequencediagram}
+    \newinst{caller}{Caller}
+    \newinst[3]{c2}{$C_2$}
+
+    \begin{call}{caller}{CheckSafe($t_6$, $x \neq y$)}{c2}{Safe}
+        \begin{call}{c2}{CondSafe($x \neq y$)}{c2}{$x > y$}\end{call}
+        \begin{call}{c2}{CheckSafe($t_2$, $x > y$) on $C_0$}{c2}{Maybe}\end{call}
+        \begin{call}{c2}{CheckSafe($t_4$, $x > y$) on $C_1$}{c2}{Safe}\end{call}
+        \begin{call}{c2}{narrow()}{c2}{}\end{call}      
+        \begin{call}{c2}{CondSafe($x \neq y$)}{c2}{$y > x$}\end{call}
+        \begin{call}{c2}{CheckSafe($t_2$, $y > x$) on $C_0$}{c2}{Safe}\end{call}
+    \end{call}
+  \end{sequencediagram}
+
+  \caption{Sequence diagram for the example program}
+  \label{fig:sequence}
+\end{figure}
+
+\end{frame}
+
+
+
+\begin{frame}
+
+\begin{figure}
+  \centering
+
+  \begin{sequencediagram}
+    \newinst[0]{c2}{$C_2$}
+    \newinst[3]{c0}{$C_0$}
+
+    \begin{call}{c2}{CheckSafe($t_2$, $x > y$)}{c0}{Maybe}
+      \begin{call}{c0}{CondSafe($x > y$)}{c0}{None}\end{call}
+    \end{call}
+  \end{sequencediagram}
+\end{figure}
+
+\end{frame}
+
+
+
+\begin{frame}
+
+\begin{figure}
+  \centering
+
+  \begin{sequencediagram}
+    \newinst[0]{c2}{$C_2$}
+    \newinst[2.5]{c1}{$C_1$}
+    \newinst[2.5]{c0}{$C_0$}
+
+    \begin{call}{c2}{CheckSafe($t_4$, $x > y$)}{c1}{Safe}
+      \begin{call}{c1}{CondSafe($x > y$)}{c1}{$i > 0 \wedge x \geq y$}\end{call}
+      \begin{call}{c1}{CheckSafe($t_1$, $x \geq y$)}{c0}{Safe}\end{call}
+      \begin{call}{c1}{CheckSafe($t_1$, $i > 0$)}{c0}{Safe}
+        \begin{call}{c0}{CondSafe($i > 0$)}{c0}{$i > 0$}\end{call}
+      \end{call}
+    \end{call}
+  \end{sequencediagram}
+\end{figure}
+
+\end{frame}
+
+
+
+\begin{frame}
+
+\begin{figure}
+  \centering
+
+  \begin{sequencediagram}
+    \newinst[0]{c2}{$C_2$}
+    \newinst[3]{c0}{$C_0$}
+
+    \begin{call}{c2}{CheckSafe($t_2$, $y > x$)}{c0}{Safe}
+      \begin{call}{c0}{CondSafe($y > x$)}{c0}{Safe}\end{call}
+    \end{call}
+  \end{sequencediagram}
+
+\end{figure}
+
+\end{frame}
+
+
+
+%----------------------------------------------------------------------------------------
+%	END OF PRESENTATION SLIDES
+%----------------------------------------------------------------------------------------
 \begin{frame}
 \frametitle{References}
 \footnotesize{
