@@ -199,6 +199,9 @@ RWTH Aachen \\ % Your institution for the title page
 
 \begin{frame}
   \frametitle{Example program}
+  \begin{block}{Program}
+    $\mathcal{V} = \lbrace x,y,i \rbrace$, $\mathcal{L} = \lbrace \ell_0, \ell_1, \ell_2 \rbrace$, $\mathcal{T} = \lbrace t_i \mid i \in \lbrace 1,\dots,6 \rbrace \rbrace$
+  \end{block}
   \begin{figure}
     \centering
     \begin{tikzpicture}[->,>=stealth',auto,node distance=3cm,
@@ -237,23 +240,136 @@ RWTH Aachen \\ % Your institution for the title page
         safe/.style={draw=green, text=green},
         maybe/.style={draw=orange, text=orange}]
       
-      \node[main node, onslide={<8-9>inspect}, onslide={<10>safe}] (0) {$l_0$};
-      \node[main node, onslide={<6-10>inspect}, onslide={<11>safe}] (1) [right of=0] {$l_1$};
-      \node[main node, onslide={<2-14>inspect}, onslide={<15>safe}] (2) [right of=1] {$l_2$};
+      \node[main node, onslide={<3>inspect}, onslide={<6-8>inspect}, onslide={<9>safe}, onslide={<10>inspect}, onslide={<11>safe}, onslide={<15>inspect}] (0) {$l_0$};
+      \node[main node, onslide={<5-11>inspect}, onslide={<12>safe}] (1) [right of=0] {$l_1$};
+      \node[main node, onslide={<2-16>inspect}, onslide={<17>safe}] (2) [right of=1] {$l_2$};
       
       \node (4) [right of=2] {};
       \node (5) [left of=0] {};
       
       \path[every node/.style={font=\sffamily\small}]
-      (0) edge[aligned edge, onslide={<7-10>inspect}, onslide={<11>safe}] node {$t_1: x \geq y$} (1)
-      edge[aligned edge, bend right=25, onslide={<3>inspect}, onslide={<4-12>maybe}, onslide={<13>inspect}, onslide={<14>safe}] node [below] {$t_2: y > x$\\\only<13->{$\wedge \mathbf{x \leq y}$}} (2)
-      (1) edge[aligned edge, loop above, onslide={<6-10>inspect}, onslide={<11>safe}] node {$t_3:$\\$i > 0 \wedge$\\$x' = x + 1 \wedge$\\$i' = i - 1$} (1)
-      edge[aligned edge, onslide={<5-11>inspect}, onslide={<12-14>safe}] node {$t_4: i = 0$} (2)
-      (2) edge[aligned edge, loop above, onslide={<2-14>inspect}, onslide={<15>safe}] node {$t_5:$\\$x' = x + 1 \wedge$\\$y' = y + 1$\\\only<13->{$\wedge \mathbf{x \leq y}$}} (2)
-      edge[aligned edge, onslide={<1-15>inspect}, onslide={<16>safe}] node {$t_6$, assert($x \neq y$)} (4)
-      (5) edge[aligned edge, onslide={<9>inspect}, onslide={<10>safe}] node {$t_0: i > 0$} (0);
+      (0) edge[aligned edge, onslide={<6-8>inspect}, onslide={<9>safe}, onslide={<10>inspect}, onslide={<11>safe}] node {$t_1: x \geq y$} (1)
+      edge[aligned edge, bend right=25, onslide={<3>inspect}, onslide={<4-12>maybe}, onslide={<15>inspect}, onslide={<16>safe}] node [below] {$t_2: y > x$\\\only<13->{$\wedge \mathbf{x \leq y}$}} (2)
+      (1) edge[aligned edge, loop above, onslide={<5-10>inspect}, onslide={<12>safe}] node {$t_3:$\\$i > 0 \wedge$\\$x' = x + 1 \wedge$\\$i' = i - 1$} (1)
+      edge[aligned edge, onslide={<5-11>inspect}, onslide={<12>safe}, onslide={<15-16>safe}] node {$t_4: i = 0$} (2)
+      (2) edge[aligned edge, loop above, onslide={<2-16>inspect}, onslide={<17>safe}] node {$t_5:$\\$x' = x + 1 \wedge$\\$y' = y + 1$\\\only<13->{$\wedge \mathbf{x \leq y}$}} (2)
+      edge[aligned edge, onslide={<1-16>inspect}, onslide={<17>safe}] node {$t_6$, assert($x \neq y$)} (4)
+      (5) edge[aligned edge, onslide={<7>inspect}, onslide={<8>safe}] node {$t_0: i > 0$} (0);
     \end{tikzpicture}
   \end{figure}
+
+  \only<1>{
+    \begin{block}{Task}
+      Prove that the program is safe for $x \neq y$ at $t_6$
+    \end{block}
+  }
+
+  \only<2>{
+    \begin{block}{CheckSafe on $\lbrace \ell_2 \rbrace$ for $x \neq y$}
+      $t_6$ does not already imply $x \neq y$\\
+      $t_6$ is not an initial transition\\
+      Call CondSafe, get $x > y$ as precondition
+    \end{block}    
+  }
+
+  \only<3>{
+    \begin{block}{CheckSafe on $\lbrace \ell_0 \rbrace$ for $x > y$}
+      $t_2$ does not already imply $x > y$\\
+      $t_2$ is not an initial transition\\
+      Call CondSafe
+    \end{block}    
+  }
+
+  \only<4>{
+    \begin{block}{CheckSafe on $\lbrace \ell_0 \rbrace$ for $x > y$}
+      No precondition, since $y > x$ contradicts $x > y$\\
+      Path is maybe safe, but not for $x > y$
+    \end{block}    
+  }
+
+  \only<5>{
+    \begin{block}{CheckSafe on $\lbrace \ell_1 \rbrace$ for $x > y$}
+      $t_4$ does not already imply $x > y$\\
+      $t_4$ is not an initial transition\\
+      Call CondSafe, get $i > 0 \wedge x \geq y$ as precondition
+    \end{block}    
+  }
+
+  \only<6>{
+    \begin{block}{CheckSafe on $\lbrace \ell_0 \rbrace$ for $i > 0$}
+      $t_1$ does not already imply $i > 0$\\
+      $t_1$ is not an initial transition\\
+      Call CondSafe, get $i > 0$ as precondition
+    \end{block}    
+  }
+
+  \only<7>{
+    \begin{block}{CheckSafe on initial SCC for $i > 0$}
+      $t_0$ does already imply $i > 0$
+    \end{block}    
+  }
+
+  \only<8>{
+    \begin{block}{CheckSafe on initial SCC for $i > 0$}
+      Path is safe for $i > 0$
+    \end{block}    
+  }
+
+  \only<9>{
+    \begin{block}{CheckSafe on $\lbrace \ell_0 \rbrace$ for $i > 0$}
+      Path is safe for $i > 0$
+    \end{block}    
+  }
+
+  \only<10>{
+    \begin{block}{CheckSafe on $\lbrace \ell_0 \rbrace$ for $x \geq y$}
+      $t_1$ does already imply $x \geq y$
+    \end{block}    
+  }
+
+  \only<11>{
+    \begin{block}{CheckSafe on $\lbrace \ell_0 \rbrace$ for $x \geq y$}
+      Path is safe for $x \geq y$
+    \end{block}    
+  }
+
+  \only<12>{
+    \begin{block}{CheckSafe on $\lbrace \ell_1 \rbrace$ for $x > y$}
+      Path is safe for $x > y$
+    \end{block}    
+  }
+
+  \only<13>{
+    \begin{block}{Narrow on $\lbrace \ell_2 \rbrace$}
+      Add $x \leq y$ to $t_2$\\
+      Add $x \leq y$ to $t_5$
+    \end{block}    
+  }
+
+  \only<14>{
+    \begin{block}{CheckSafe on $\lbrace \ell_2 \rbrace$ for $x \neq y$}
+      Call CondSafe, get $y > x$ instead of $x > y$ as precondition
+    \end{block}    
+  }
+
+  \only<15>{
+    \begin{block}{CheckSafe on $\lbrace \ell_0 \rbrace$ for $y > x$}
+      $t_2$ does already imply $y > x$
+    \end{block}    
+  }
+
+  \only<16>{
+    \begin{block}{CheckSafe on $\lbrace \ell_0 \rbrace$ for $y > x$}
+      Path is safe for $y > x$
+    \end{block}    
+  }
+
+  \only<17>{
+    \begin{block}{CheckSafe on $\lbrace \ell_0 \rbrace$ for $y > x$}
+      Program is safe for $x \neq y$
+    \end{block}    
+  }
+
 \end{frame}
 
 
