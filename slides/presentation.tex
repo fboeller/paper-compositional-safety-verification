@@ -116,6 +116,21 @@ RWTH Aachen \\ % Your institution for the title page
 %	PRESENTATION SLIDES
 %----------------------------------------------------------------------------------------
 
+\begin{frame}
+  \frametitle{Algorithms}
+  \begin{figure}
+    \centering
+    \begin{tikzpicture}[->, level distance=3cm,
+        level 1/.style={sibling distance=3cm},
+        level 2/.style={sibling distance=1.5cm}]  
+      \node {CheckSafe}
+      child { node {CheckSafe} }
+      child { node {CondSafe} }
+      child { node {Narrowing} };
+    \end{tikzpicture}
+  \end{figure}
+\end{frame}
+
 \section{Example execution}
 
 \begin{frame}
