@@ -148,13 +148,14 @@ RWTH Aachen \\ % Your institution for the title page
 
 \section{Preliminaries}
 
-\begin{frame}
+\begin{frame}[t]
   \frametitle{Programs}
   \begin{block}{Program}
     $\mathcal{L} = \lbrace \ell_0, \ell_1, \ell_2 \rbrace$
     \only<2->{, $\mathcal{T} = \lbrace t_i \mid i \in \lbrace 1,\dots,6 \rbrace \rbrace$}
     \only<3->{, $\mathcal{V} = \lbrace x,y,i \rbrace$, $\mathcal{V}' = \lbrace x',y',i' \rbrace$}
   \end{block}
+  \begin{overlayarea}{\linewidth}{\textheight}
   \begin{figure}
     \centering
     \begin{tikzpicture}[->,>=stealth',auto,node distance=3cm,
@@ -176,14 +177,15 @@ RWTH Aachen \\ % Your institution for the title page
         \path[every node/.style={font=\sffamily\small}]
         (0) edge[aligned edge] node {$t_1$\only<3->{$: x \geq y$}} (1)
         (0) edge[aligned edge, bend right=25] node [below] {$t_2$\only<3->{$: y > x$}} (2)
-        (1) edge[aligned edge, loop above, onslide={<6->scc1}] node {$t_3$\only<3->{$:$\\$i > 0 \wedge$\\$x' = x + 1 \wedge$\\$i' = i - 1$}} (1)
+        (1) edge[aligned edge, loop above, onslide={<5->scc1}] node {$t_3$\only<3->{$:$\\$i > 0 \wedge$\\$x' = x + 1 \wedge$\\$i' = i - 1$}} (1)
         (1) edge[aligned edge] node {$t_4$\only<3->{$: i = 0$}} (2)
-        (2) edge[aligned edge, loop above, onslide={<6->scc2}] node {$t_5$\only<3->{$:$\\$x' = x + 1 \wedge$\\$y' = y + 1$}} (2)
+        (2) edge[aligned edge, loop above, onslide={<5->scc2}] node {$t_5$\only<3->{$:$\\$x' = x + 1 \wedge$\\$y' = y + 1$}} (2)
         (2) edge[aligned edge] node {$t_6$\only<4->{, assert($x \neq y$)}} (4)
         (5) edge[aligned edge] node {$t_0$\only<3->{$: i > 0$}} (0);
       }
     \end{tikzpicture}
   \end{figure}
+  \end{overlayarea}
 \end{frame}
 
 \begin{frame}
@@ -303,6 +305,8 @@ RWTH Aachen \\ % Your institution for the title page
     \end{block}
   }
 
+  \begin{overlayarea}{\linewidth}{\textheight}
+  
   \only<9>{
     \begin{block}{CheckSafe on $\lbrace \ell_0 \rbrace$ for $x > y$}
       $t_2$ does not already imply $x > y$\\
@@ -401,6 +405,8 @@ RWTH Aachen \\ % Your institution for the title page
     \end{block}    
   }
 
+  \end{overlayarea}
+  
 \end{frame}
 
 \section{Conclusion}
