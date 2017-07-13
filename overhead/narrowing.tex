@@ -1,0 +1,19 @@
+\begin{algorithm}
+\caption{Narrowing}\label{narrowing}
+\begin{spacing}{2}
+\begin{algorithmic}[1]
+\fontsize{14}{14}\selectfont
+  \ForAll {entry transitions}
+    \ForAll {literals of the CII}
+      \If {literal could not be proved safe for this transition}
+        \State Add a conjunct with the negated literal to the transition
+      \EndIf
+    \EndFor
+  \EndFor
+  \ForAll {transitions of the SCC}  
+    \State Add a conjunct with the negated CII at the start location to the transition
+    \State Add a conjunct with the negated CII at the end location to the transition
+  \EndFor
+\end{algorithmic}
+\end{spacing}
+\end{algorithm}

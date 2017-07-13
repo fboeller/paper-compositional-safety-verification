@@ -1,0 +1,27 @@
+\begin{algorithm}
+\caption{CheckSafe}\label{checksafe}
+\begin{spacing}{2}
+\begin{algorithmic}[1]
+\fontsize{14}{14}\selectfont
+  \State Input: The program, an SCC, the entry transitions of the SCC, an exit transition with an assertion
+  \If {the exit transition already implies the assertion}
+    \Return Safe
+  \ElsIf {the exit transition is an initial transition}
+    \Return Maybe
+  \EndIf
+  \State Call CondSafe for the SCC with the given assertion
+  \If {no CII could be found}
+    \Return Maybe
+  \EndIf
+  \ForAll {entry SCCs}
+    \ForAll {literals of the according condition of the CII}
+      \State Call CheckSafe for the entry SCC and with the literal as assertion
+    \EndFor
+  \EndFor
+  \If {all calls returned Safe}
+    \Return Safe
+  \EndIf
+  \Return the result of a call to CheckSafe with a narrowed version
+\end{algorithmic}
+\end{spacing}
+\end{algorithm}
