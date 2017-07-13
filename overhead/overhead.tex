@@ -1,4 +1,4 @@
-\documentclass[a4paper]{article}
+\documentclass[a4paper, 12pt]{article}
 
 \usepackage[landscape]{geometry}
 \geometry{a4paper,left=30mm,right=30mm, top=3cm, bottom=3cm}
@@ -18,11 +18,15 @@
 \let\oldReturn\Return
 \renewcommand{\Return}{\State\oldReturn}
 
+\DeclareMathSizes{12}{15}{15}{15}
+
 \begin{document}
 
 \input{checksafe.tex}
 \newpage
 \input{condsafe.tex}
+\newpage
+\input{maxsmt.tex}
 \newpage
 \input{narrowing.tex}
 
