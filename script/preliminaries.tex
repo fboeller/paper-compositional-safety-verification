@@ -40,7 +40,11 @@ Figure \ref{fig:sccs} shows the three SCCs and their entry transitions.
 We define an assertion as a pair $(t, \varphi)$ where $t \in T$ and $\varphi \in \mathcal{F}(\mathcal{V})$.
 We say that a program is safe for an assertion if and only if $\forall (\ell_0, \upsilon_0): (\ell_0, \upsilon_0) \rightarrow_P^* \circ \rightarrow_t (\ell, \upsilon) \Rightarrow \upsilon \models \varphi$.
 We say that a program is conditional safe for an assertion if from a state where a precondition holds every path to an assertion also leads to the fulfillment of the assertion.
-The example program contains one assertion $(t_6, x \neq y)$. The goal is to show that the program is safe for this assertion. The algorithm uses the conditional safety property for this purpose.
+The example program contains one assertion $(t_6, x \neq y)$.
+It is safe for this assertion, if from each run from $l_0$, where the values of $x$ and $y$ are arbitrary integers and the value of $i$ is a positive integer, at $t_6$ the condition $x \neq y$ always holds.
+The SCC at $l_2$ is conditional safe for an assertion, if there exists a precondition (for instance $x \neq y$), such that the assertion holds for every run from $l_0$ which does satisfy the precondition directly before entering the SCC.
+The goal is to show that the program is safe for the assertion $(t_6, x \neq y)$.
+The algorithm uses the conditional safety property for this purpose.
 
 \subsection{Invariants}
 
