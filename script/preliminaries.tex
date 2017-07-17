@@ -49,7 +49,7 @@ The algorithm uses the conditional safety property for this purpose.
 \subsection{Invariants}
 
 An invariant is defined as an assignment $\mathcal{I} : \mathcal{L} \rightarrow \mathcal{F}(\mathcal{V})$ if and only if for all reachable states $(\ell, \upsilon)$ it holds that $\upsilon \models \mathcal{I}(\ell)$.
-For instance a function with $\mathcal{I}(\ell) = x > 0$ for each location $\ell \in \mathcal{L}$ is an invariant.
+For instance a function with $\mathcal{I}(\ell) = i \geq 0$ for each location $\ell \in \mathcal{L}$ is an invariant of the example program.
 
 An invariant is inductive if and only if additionally it holds that $\top \models \mathcal{I}(\ell_0)$ and for all $(\ell, \tau, \ell') \in \mathcal{P}$ it holds that $\mathcal{I}(\ell) \wedge \tau \models \mathcal{I}(\ell')'$. We call the first initiation condition and the latter consecution condition.
 $\mathcal{I}$ with $\mathcal{I}(\ell_0) = i > 0$, $\mathcal{I}(\ell_1) = x > y \vee i > 0$ and $\mathcal{I}(\ell_2) = x \neq y$ is a valid inductive invariant of the example program.

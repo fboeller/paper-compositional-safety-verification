@@ -61,7 +61,7 @@ Therefore this path is also proved safe.
 Until this point we abstracted from the inner workings of narrowing.
 The idea of narrowing is to manipulate the original program, such that the algorithm CondSafe is able to find a different CII to show safety for not yet proved entries.
 In the example program it would be sufficient to show that the post condition $x > y$ holds after each evaluation step before the location $l_2$.
-But this can not be shown for one entry transitions, therefore we try to use narrowing.
+But this can not be shown for one entry transition, therefore we try to use narrowing.
 
 \input{algorithms/narrowing.tex}
 
