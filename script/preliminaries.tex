@@ -1,9 +1,9 @@
 \section{Preliminaries}
 \label{sec:preliminaries}
 
-After the informal introduction of the example program in the last chapter, this chapter will introduce formal definitions.
-In the first part there will be presented a formal definition of program graphs.
-In the second part there will be introduced different types of invariants, which are necessary for the analysis.
+After the informal introduction of the example program in the previous chapter, this chapter introduces formal definitions.
+In the first part a formal definition of program graphs is presented.
+In the second part the different types of invariants, which are necessary for the analysis, are introduced.
 
 \subsection{Program}
 
@@ -21,8 +21,9 @@ A valid starting state in the example program could be for instance $(\ell_0, \u
 
 We denote with $\mathcal{F}(\mathcal{V})$ the set of formulas consisting of conjunctions of linear inequalities over the variables $\mathcal{V}$.
 We define a program as a directed graph consisting of the program locations $\mathcal{L}$ and a set of transitions $\mathcal{T} = \lbrace (\ell, \tau, \ell') \mid \ell, \ell' \in \mathcal{L}, \tau \in \mathcal{F}(\mathcal{V} \cup \mathcal{V}') \rbrace$ between those locations.
-If for a variable $v$ no assignment $v' = \dots$ is given, we assume the trivial assignment $v' = v$.
-The example program consists of seven transitions. The formal representation of $t_3$ is for instance $(\ell_1, i > 0 \wedge x' = x + 1 \wedge i' = i - 1 \wedge y' = y,\ell_1)$.
+The example program consists of seven transitions.
+If it contains for a variable $v$ no assignment $v' = \dots$, we assume the trivial assignment $v' = v$.
+Therefore the formal representation of $t_3$ is for instance $(\ell_1, i > 0 \wedge x' = x + 1 \wedge i' = i - 1 \wedge y' = y,\ell_1)$.
 
 An evaluation step with a transition $t = (\ell, \tau, \ell') \in \mathcal{T}$ leads a program state $(\ell, \upsilon)$ to another program state $(\ell', \upsilon')$ if and only if $\upsilon \models \tau$ and $\upsilon' \models \tau$. We then write $(\ell, \upsilon) \rightarrow_t (\ell', \upsilon')$.
 For instance $(\ell_1,\upsilon_{[i \rightarrow 0, x \rightarrow 1, y \rightarrow 2]}) \rightarrow_{t_4} (\ell_2,\upsilon_{[i \rightarrow 0, x \rightarrow 1, y \rightarrow 2]})$ is a valid evaluation step in the program, while $(\ell_1,\upsilon_{[i \rightarrow 1, x \rightarrow 1, y \rightarrow 2]}) \rightarrow_{t_4} (\ell_2,\upsilon_{[i \rightarrow 1, x \rightarrow 1, y \rightarrow 2]})$ is not a valid evaluation step, since $i = 0$ does not hold for both evaluations.
