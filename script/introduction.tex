@@ -14,22 +14,21 @@ Therefore the presented algorithm analyzes parts semi-independently, where the a
 \subsection{Structure}
 
 This paper aims at explaining the various distinctions of cases of the algorithm for compositional safety verification with a single example.
-In the next section of this chapter this example will be presented.
-The following chapter will cover formal definitions of program graphs and invariants and illustrate them with the presented example.
+In the third section of the first chapter this example is presented.
+The second chapter covers formal definitions of program graphs and invariants and illustrates them with the presented example.
 
-The third chapter will introduce the algorithm. 
-At first an overview over the basic analysis of a whole program will be given and explained with the example, after that narrowing and the analysis of components will be explained.
-For the analysis of components Max-SMT-Solving, an extension of SMT-Solving, will be introduced.
+The third chapter introduces the algorithm. 
+At first an overview over the basic analysis of a whole program is given and explained with the example, after that narrowing and the analysis of components are explained.
+For the analysis of components Max-SMT-Solving, an extension of SMT-Solving, is introduced.
 
-In the end a summary of the method will be given.
+In the fourth chapter a summary of the method is given.
 
 \subsection{Example program}
 
 \input{figures/example.tex}
 
-To show the inner workings of the algorithm, we will use a single example and explain based on that the different techniques of the algorithm.
+To show the inner workings of the algorithm, we use a single example (\ref{fig:example}) and explain based on that the different techniques of the algorithm.
 
-The example program is shown in \ref{fig:example}.
 It has three input parameters $x$, $y$ and $i>0$.
 The task of the safety verification is to assure, that after every possible evaluation $x \neq y$ holds.
 
