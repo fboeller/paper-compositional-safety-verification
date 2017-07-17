@@ -164,24 +164,26 @@ RWTH Aachen \\ % Your institution for the title page
         aligned edge/.style={align=left},
         scc0/.style={draw=orange, text=orange},
         scc1/.style={draw=green, text=green},
-        scc2/.style={draw=blue, text=blue}]
+        scc2/.style={draw=blue, text=blue},
+        new/.style={draw=blue, text=blue},
+        newtext/.style={text=blue}]
 
-      \node[main node, onslide={<5->scc0}] (0) {$l_0$};
-      \node[main node, onslide={<5->scc1}] (1) [right of=0] {$l_1$};
-      \node[main node, onslide={<5->scc2}] (2) [right of=1] {$l_2$};
+      \node[main node, onslide={<1>new}, onslide={<5->scc0}] (0) {$l_0$};
+      \node[main node, onslide={<1>new}, onslide={<5->scc1}] (1) [right of=0] {$l_1$};
+      \node[main node, onslide={<1>new}, onslide={<5->scc2}] (2) [right of=1] {$l_2$};
       
       \node (4) [right of=2] {};
       \node (5) [left of=0] {};
 
       \only<2->{
         \path[every node/.style={font=\sffamily\small}]
-        (0) edge[aligned edge] node {$t_1$\only<3->{$: x \geq y$}} (1)
-        (0) edge[aligned edge, bend right=25] node [below] {$t_2$\only<3->{$: y > x$}} (2)
-        (1) edge[aligned edge, loop above, onslide={<5->scc1}] node {$t_3$\only<3->{$:$\\$i > 0 \wedge$\\$x' = x + 1 \wedge$\\$i' = i - 1$}} (1)
-        (1) edge[aligned edge] node {$t_4$\only<3->{$: i = 0$}} (2)
-        (2) edge[aligned edge, loop above, onslide={<5->scc2}] node {$t_5$\only<3->{$:$\\$x' = x + 1 \wedge$\\$y' = y + 1$}} (2)
-        (2) edge[aligned edge] node {$t_6$\only<4->{, assert($x \neq y$)}} (4)
-        (5) edge[aligned edge] node {$t_0$\only<3->{$: i > 0$}} (0);
+        (0) edge[aligned edge, onslide={<2>new}, onslide={<3>newtext}] node {$t_1$\only<3->{$: x \geq y$}} (1)
+        (0) edge[aligned edge, onslide={<2>new}, onslide={<3>newtext}, bend right=25] node [below] {$t_2$\only<3->{$: y > x$}} (2)
+        (1) edge[aligned edge, onslide={<2>new}, onslide={<3>newtext}, loop above, onslide={<5->scc1}] node {$t_3$\only<3->{$:$\\$i > 0 \wedge$\\$x' = x + 1 \wedge$\\$i' = i - 1$}} (1)
+        (1) edge[aligned edge, onslide={<2>new}, onslide={<3>newtext}] node {$t_4$\only<3->{$: i = 0$}} (2)
+        (2) edge[aligned edge, onslide={<2>new}, onslide={<3>newtext}, loop above, onslide={<5->scc2}] node {$t_5$\only<3->{$:$\\$x' = x + 1 \wedge$\\$y' = y + 1$}} (2)
+        (2) edge[aligned edge, onslide={<2>new}, onslide={<4>newtext}] node {$t_6$\only<4->{, assert($x \neq y$)}} (4)
+        (5) edge[aligned edge, onslide={<2>new}, onslide={<3>newtext}] node {$t_0$\only<3->{$: i > 0$}} (0);
       }
     \end{tikzpicture}
   \end{figure}
