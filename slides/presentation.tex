@@ -259,7 +259,9 @@ RWTH Aachen \\ % Your institution for the title page
         inspect/.style={draw=blue, text=blue},
         safe/.style={draw=green, text=green},
         maybe/.style={draw=orange, text=orange},
-        maxsmt/.style={draw=red, text=red}]
+        maxsmt/.style={draw=red, text=red},
+        changed/.style={ultra thick}
+      ]
       
       \node[main node, onslide={<9>inspect}, onslide={<12-14>inspect}, onslide={<15>safe}, onslide={<16>inspect}, onslide={<17>safe}, onslide={<21>inspect}] (0) {$l_0$};
       \node[main node, onslide={<11-17>inspect}, onslide={<18>safe}] (1) [right of=0] {$l_1$};
@@ -269,13 +271,65 @@ RWTH Aachen \\ % Your institution for the title page
       \node (5) [left of=0] {};
       
       \path[every node/.style={font=\sffamily\small}]
-      (0) edge[aligned edge, onslide={<12-14>inspect}, onslide={<15>safe}, onslide={<16>inspect}, onslide={<17>safe}] node {$t_1: x \geq y$} (1)
-      edge[aligned edge, bend right=25, onslide={<4,8>maxsmt}, onslide={<9>inspect}, onslide={<10-18>maybe}, onslide={<21>inspect}, onslide={<22>safe}] node [below] {$t_2: y > x$\\\only<13->{$\wedge \mathbf{x \leq y}$}} (2)
-      (1) edge[aligned edge, loop above, onslide={<11-16>inspect}, onslide={<18>safe}] node {$t_3:$\\$i > 0 \wedge$\\$x' = x + 1 \wedge$\\$i' = i - 1$} (1)
-      edge[aligned edge, onslide={<5,8>maxsmt}, onslide={<11-17>inspect}, onslide={<18>safe}, onslide={<21-22>safe}] node {$t_4: i = 0$} (2)
-      (2) edge[aligned edge, loop above, onslide={<6,8>maxsmt}, onslide={<2-5,7,9-22>inspect}, onslide={<23>safe}] node {$t_5:$\\$x' = x + 1 \wedge$\\$y' = y + 1$\\\only<13->{$\wedge \mathbf{x \leq y}$}} (2)
-      edge[aligned edge, onslide={<7,8>maxsmt}, onslide={<1-6,9-22>inspect}, onslide={<23>safe}] node {$t_6$, assert($x \neq y$)} (4)
-      (5) edge[aligned edge, onslide={<13>inspect}, onslide={<14>safe}] node {$t_0: i > 0$} (0);
+      (0)
+      edge [aligned edge,
+        onslide={<12>changed}, onslide={<12-14>inspect},
+        onslide={<15>changed}, onslide={<15>safe},
+        onslide={<16>changed}, onslide={<16>inspect},
+        onslide={<17>changed}, onslide={<17>safe}]
+      node {$t_1: x \geq y$}
+      (1)
+
+      (0)
+      edge [aligned edge, bend right=25,
+        onslide={<4,8>changed}, onslide={<4,8>maxsmt},
+        onslide={<9>changed}, onslide={<9>inspect},
+        onslide={<10>changed}, onslide={<10-18>maybe},
+        onslide={<21>changed}, onslide={<21>inspect},
+        onslide={<22>changed}, onslide={<22>safe},
+        onslide={<19>changed}]
+      node [below] {$t_2: y > x$\\\only<19->{$\wedge \mathbf{x \leq y}$}}
+      (2)
+
+      (1)
+      edge [aligned edge, loop above,
+        onslide={<11>changed}, onslide={<11-16>inspect},
+        onslide={<18>changed}, onslide={<18>safe}]
+      node {$t_3:$\\$i > 0 \wedge$\\$x' = x + 1 \wedge$\\$i' = i - 1$}
+      (1)
+
+      (1)
+      edge [aligned edge,
+        onslide={<5,8>changed}, onslide={<5,8>maxsmt},
+        onslide={<11>changed}, onslide={<11-17>inspect},
+        onslide={<18>changed}, onslide={<18>safe},
+        onslide={<21>changed}, onslide={<21-22>safe}]
+      node {$t_4: i = 0$}
+      (2)
+
+      (2)
+      edge [aligned edge, loop above,
+        onslide={<2>changed}, onslide={<2-5,7,9-22>inspect},
+        onslide={<6,8>changed}, onslide={<6,8>maxsmt},
+        onslide={<23>changed}, onslide={<23>safe},
+        onslide={<19>changed}]
+      node {$t_5:$\\$x' = x + 1 \wedge$\\$y' = y + 1$\\\only<19->{$\wedge \mathbf{x \leq y}$}}
+      (2)
+
+      (2)
+      edge [aligned edge,
+        onslide={<1>changed}, onslide={<1-6,9-22>inspect},
+        onslide={<7,8>changed}, onslide={<7,8>maxsmt},
+        onslide={<23>changed}, onslide={<23>safe}]
+      node {$t_6$, assert($x \neq y$)}
+      (4)
+
+      (5)
+      edge[aligned edge,
+        onslide={<13>changed}, onslide={<13>inspect},
+        onslide={<14>changed}, onslide={<14>safe}]
+      node {$t_0: i > 0$}
+      (0);
     \end{tikzpicture}
   \end{figure}
 
