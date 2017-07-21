@@ -75,6 +75,8 @@
 \let\oldReturn\Return
 \renewcommand{\Return}{\State\oldReturn}
 
+\definecolor{mygreen}{rgb}{0.01, 0.75, 0.24}
+
 \usepackage{tikz}
 \usetikzlibrary{arrows,decorations.pathmorphing,positioning,fit,trees,shapes,automata}
 \usepackage{pgf-umlsd}
@@ -163,7 +165,7 @@ RWTH Aachen \\ % Your institution for the title page
         main node/.style={circle,draw,font=\sffamily\Large\bfseries},
         aligned edge/.style={align=left},
         scc0/.style={draw=orange, text=orange},
-        scc1/.style={draw=green, text=green},
+        scc1/.style={draw=mygreen, text=mygreen},
         scc2/.style={draw=blue, text=blue},
         new/.style={draw=blue, text=blue},
         newtext/.style={text=blue}]
@@ -257,7 +259,7 @@ RWTH Aachen \\ % Your institution for the title page
         main node/.style={circle,draw,font=\sffamily\Large\bfseries},
         aligned edge/.style={align=left},
         inspect/.style={draw=blue, text=blue},
-        safe/.style={draw=green, text=green},
+        safe/.style={draw=mygreen, text=mygreen},
         maybe/.style={draw=orange, text=orange},
         maxsmt/.style={draw=red, text=red},
         changed/.style={ultra thick}
