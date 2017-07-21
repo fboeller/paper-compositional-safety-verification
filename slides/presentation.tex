@@ -290,7 +290,7 @@ RWTH Aachen \\ % Your institution for the title page
         onslide={<21>changed}, onslide={<21>inspect},
         onslide={<22>changed}, onslide={<22>safe},
         onslide={<19>changed}]
-      node [below] {$t_2: y > x$\\\only<19->{$\wedge \mathbf{x \leq y}$}}
+      node [below] {$t_2: y > x$\\\only<19->{$\wedge \mathbf{\neg (x > y)}$}}
       (2)
 
       (1)
@@ -305,9 +305,10 @@ RWTH Aachen \\ % Your institution for the title page
         onslide={<5,8>changed}, onslide={<5,8>maxsmt},
         onslide={<11>changed}, onslide={<11-17>inspect},
         onslide={<18>changed}, onslide={<18>safe},
-        onslide={<21>changed}, onslide={<21-22>safe},
+        onslide={<21>changed}, onslide={<21>inspect},
+        onslide={<22>changed}, onslide={<22>safe},
         onslide={<19>changed}]
-      node {$t_4: i = 0$\\\only<19->{$\wedge$ \textbf{false}}}
+      node {$t_4: i = 0$\\\only<19->{$\wedge \mathbf{\neg (\textbf{true})}$}}
       (2)
 
       (2)
@@ -316,7 +317,7 @@ RWTH Aachen \\ % Your institution for the title page
         onslide={<6,8>changed}, onslide={<6,8>maxsmt},
         onslide={<23>changed}, onslide={<23>safe},
         onslide={<19>changed}]
-      node {$t_5:$\\$x' = x + 1 \wedge$\\$y' = y + 1$\\\only<19->{$\wedge \mathbf{x \leq y}$}}
+      node {$t_5:$\\$x' = x + 1 \wedge$\\$y' = y + 1$\\\only<19->{$\wedge \mathbf{\neg (x > y)}$}}
       (2)
 
       (2)
@@ -435,8 +436,8 @@ RWTH Aachen \\ % Your institution for the title page
 
   \only<19>{
     \begin{block}{Narrow on $\lbrace \ell_2 \rbrace$}
-      Add $x \leq y$ to $t_2$\\
-      Add $x \leq y$ to $t_5$
+      Add $\neg (x > y)$ to $t_2$\\
+      Add $\neg (x > y)$ to $t_5$
     \end{block}    
   }
 
@@ -449,12 +450,13 @@ RWTH Aachen \\ % Your institution for the title page
   \only<21>{
     \begin{block}{CheckSafe on $\lbrace \ell_0 \rbrace$ for $y > x$}
       $t_2$ does already imply $y > x$
+      $t_4$ does already imply $y > x$
     \end{block}    
   }
 
   \only<22>{
     \begin{block}{CheckSafe on $\lbrace \ell_0 \rbrace$ for $y > x$}
-      Path is safe for $y > x$
+      Paths are safe for $y > x$
     \end{block}    
   }
 
@@ -486,26 +488,5 @@ RWTH Aachen \\ % Your institution for the title page
   \end{block}
 \end{frame}
 
-%----------------------------------------------------------------------------------------
-%	END OF PRESENTATION SLIDES
-%----------------------------------------------------------------------------------------
-\begin{frame}
-\frametitle{References}
-\footnotesize{
-\begin{thebibliography}{99} % Beamer does not support BibTeX so references must be inserted manually as below
-\bibitem[Brockschmidt, Larraz, Oliveras, Rodriguez-Carbonell, Rubio, 2015]{p1} Brockschmidt, Marc and Larraz, Daniel and Oliveras, Albert and Rodriguez-Carbonell, Enric and Rubio, Albert (2015)
-\newblock Compositional Safety Verification with Max-SMT
-\newblock \emph{Proceedings of FMCAD'15}
-\end{thebibliography}
-}
-\end{frame}
-
-%------------------------------------------------
-
-\begin{frame}
-\Huge{\centerline{The End}}
-\end{frame}
-
-%----------------------------------------------------------------------------------------
 
 \end{document} 
