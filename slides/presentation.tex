@@ -148,7 +148,7 @@ RWTH Aachen \\ % Your institution for the title page
   \end{figure}
 \end{frame}
 
-\section{Preliminaries}
+\section{Program graphs}
 
 \begin{frame}[t]
   \frametitle{Programs}
@@ -192,32 +192,100 @@ RWTH Aachen \\ % Your institution for the title page
   \end{overlayarea}
 \end{frame}
 
+\section{Algorithms}
+
 \begin{frame}
-  \frametitle{Algorithms}
+  \frametitle{CheckSafe}
+  \begin{block}{Idea}
+    Prove that an assertion is satisfied by recursively checking all entry components
+  \end{block}
   \begin{figure}
     \centering
-    \begin{tikzpicture}[->, >=stealth',shorten >=1pt,auto,node distance=1.5cm,thick]  
-      \node (1) {CheckSafe};
-      \node (2) [below left of=1] {CondSafe};
-      \node (3) [below right of=1] {Narrowing};
-      \path
-      (1) edge [loop above] node {} (1)
-          edge node {} (2)
-          edge node {} (3);
+    \begin{tikzpicture}[->,>=stealth',auto,node distance=2cm,
+        thick,
+        main node/.style={circle,draw,font=\sffamily\Large\bfseries},
+        inspect/.style={draw=blue, text=blue},
+        safe/.style={draw=mygreen, text=mygreen},
+        maybe/.style={draw=orange, text=orange},
+        aligned edge/.style={align=left}]
+
+      \node[main node, onslide={<2->inspect}, onslide={<11>safe}] (0) {$l$};
+      \node[main node, onslide={<3-5>inspect}, onslide={<6->safe}] (1) [above left of=0] {$l$};
+      \node[main node, onslide={<7-9>inspect}, onslide={<10->safe}] (2) [below left of=0] {$l$};
+      
+      \node (11) [left of=1] {};
+      \node (21) [left of=2] {};
+      \node (exit) [right of=0] {};
+
+      \path[every node/.style={font=\sffamily\small}]
+        (1) edge[onslide={<3-5>inspect}, onslide={<6->safe}] node {} (0)
+        (2) edge[onslide={<7-9>inspect}, onslide={<10->safe}] node {} (0)
+        (11) edge[onslide={<4>inspect}, onslide={<5->safe}] node {} (1)
+        (21) edge[onslide={<8>inspect}, onslide={<9->safe}] node {} (2)
+        (0) edge[onslide={<2-10>inspect}, onslide={<11>safe}] node {} (exit);
     \end{tikzpicture}
   \end{figure}
-  \pause
-  \begin{block}{CheckSafe}
-    Prove that an assertion is satisfied by backtracking through all entry components
-  \end{block}
-  \pause
-  \begin{block}{CondSafe}
+\end{frame}
+
+\begin{frame}
+  \frametitle{CondSafe}
+  \begin{block}{Idea}
     Find a precondition for a component such that all runs satisfying the precondition always imply the postcondition
   \end{block}
-  \pause
-  \begin{block}{Narrowing}
+  \begin{figure}
+    \centering
+    \begin{tikzpicture}[->,>=stealth',auto,node distance=3cm,
+        thick,
+        main node/.style={circle,draw,font=\sffamily\Large\bfseries},
+        aligned edge/.style={align=left}]
+
+      \node[main node] (0) {$l$};
+      
+      \node (1) [above left of=0] {};
+      \node (2) [below left of=0] {};
+      \node (exit) [right of=0] {};
+
+      \path[every node/.style={font=\sffamily\small}]
+        (1) edge[text=blue] node[below left] {\only<2->{?}} (0)
+        (2) edge[text=blue] node[above left] {\only<2->{?}} (0)
+        (0) edge[aligned edge, loop above] node {$t: $ \dots} (0)
+        (0) edge node {postcondition} (exit);
+    \end{tikzpicture}
+  \end{figure}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Narrowing}
+  \begin{block}{Idea}
     Manipulate the program such that new preconditions can be found
-  \end{block}  
+  \end{block}
+  \begin{figure}
+    \centering
+    \begin{tikzpicture}[->,>=stealth',auto,node distance=2.5cm,
+        thick,
+        main node/.style={circle,draw,font=\sffamily\Large\bfseries},
+        inspect/.style={draw=blue, text=blue},
+        safe/.style={draw=mygreen, text=mygreen},
+        maybe/.style={draw=orange, text=orange},
+        aligned edge/.style={align=left}]
+
+      \node[main node, onslide={<1-3>inspect}, onslide={<4>safe}] (0) {$l$};
+      \node[main node, onslide={<1->safe}] (1) [above left of=0] {$l$};
+      \node[main node, onslide={<1>maybe}, onslide={<2>inspect}, onslide={<3->safe}] (2) [below left of=0] {$l$};
+      
+      \node (11) [left of=1] {};
+      \node (21) [left of=2] {};
+      \node (exit) [right of=0] {};
+
+      \path[every node/.style={font=\sffamily\small}]
+        (0) edge[aligned edge, loop above, onslide={<1-3>inspect}, onslide={<4>safe}] node {$t_0: \varphi_0$\only<2->{\\$\wedge \dots$}} (0)
+        (1) edge[aligned edge, onslide={<1->safe}] node [below left] {$t_1: \varphi_1$\only<2->{\\$\wedge \dots$}} (0)
+        (2) edge[aligned edge, onslide={<1>maybe}, onslide={<2>inspect}, onslide={<3->safe}] node {$t_2: \varphi_2$\only<2->{\\$\wedge \dots$}} (0)
+        (11) edge[onslide={<1->safe}] node {} (1)
+        (21) edge[onslide={<1>maybe}, onslide={<2>inspect}, onslide={<3->safe}] node {} (2)
+        (0) edge[onslide={<1-3>inspect}, onslide={<4>safe}] node {} (exit);
+    \end{tikzpicture}
+  \end{figure}
 \end{frame}
 
 \section{Example execution}
