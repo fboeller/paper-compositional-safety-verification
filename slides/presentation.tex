@@ -177,7 +177,7 @@ RWTH Aachen \\ % Your institution for the title page
       \node (4) [right of=2] {};
       \node (5) [left of=0] {};
 
-      \only<2->{
+      \onslide<2->{
         \path[every node/.style={font=\sffamily\small}]
         (0) edge[aligned edge, onslide={<2>new}] node {$t_1$\only<3->{$: $ \only<3>{\color{blue}} $x \geq y$}} (1)
         (0) edge[aligned edge, onslide={<2>new}, bend right=25] node [below] {$t_2$\only<3->{$: $\only<3>{\color{blue}} $y > x$}} (2)
