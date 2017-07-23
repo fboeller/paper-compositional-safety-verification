@@ -383,7 +383,7 @@ RWTH Aachen \\ % Your institution for the title page
         onslide={<21>changed}, onslide={<21>inspect},
         onslide={<22>changed}, onslide={<22>safe},
         onslide={<19>changed}]
-      node [below] {$t_2: y > x$\\\only<19->{$\wedge \mathbf{\neg (x > y)}$}}
+      node [below] {$t_2: y > x$\\\only<19->{$\wedge \mathbf{\neg (x' > y')}$}}
       (2)
 
       (1)
@@ -410,7 +410,7 @@ RWTH Aachen \\ % Your institution for the title page
         onslide={<6,8>changed}, onslide={<6,8>maxsmt},
         onslide={<23>changed}, onslide={<23>safe},
         onslide={<19>changed}]
-      node {$t_5:$\\$x' = x + 1 \wedge$\\$y' = y + 1$\\\only<19->{$\wedge \mathbf{\neg (x > y)}$}}
+      node {$t_5:$\\$x' = x + 1 \wedge$\\$y' = y + 1$\\\only<19->{$\wedge \mathbf{\neg (x > y) \wedge \neg (x' > y')}$}}
       (2)
 
       (2)
@@ -529,8 +529,8 @@ RWTH Aachen \\ % Your institution for the title page
 
   \only<19>{
     \begin{block}{Narrow on $\lbrace \ell_2 \rbrace$}
-      Add $\neg (x > y)$ to $t_2$\\
-      Add $\neg (x > y)$ to $t_5$\\
+      Add $\neg (x' > y')$ to $t_2$\\
+      Add $\neg (x > y) \wedge \neg (x' > y')$ to $t_5$\\
       Remove $t_4$
     \end{block}    
   }
@@ -543,7 +543,7 @@ RWTH Aachen \\ % Your institution for the title page
 
   \only<21>{
     \begin{block}{CheckSafe on $\lbrace \ell_0 \rbrace$ for $y > x$}
-      $t_2$ does already imply $y > x$
+      $t_2$ does already imply $y > x$\\
       $t_4$ does already imply $y > x$
     \end{block}    
   }
