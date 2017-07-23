@@ -192,7 +192,7 @@ RWTH Aachen \\ % Your institution for the title page
   \end{overlayarea}
 \end{frame}
 
-\section{Algorithms}
+\section{Algorithm overview}
 
 \begin{frame}
   \frametitle{CheckSafe}
@@ -207,22 +207,47 @@ RWTH Aachen \\ % Your institution for the title page
         inspect/.style={draw=blue, text=blue},
         safe/.style={draw=mygreen, text=mygreen},
         maybe/.style={draw=orange, text=orange},
+        changed/.style={ultra thick},
         aligned edge/.style={align=left}]
 
-      \node[main node, onslide={<2->inspect}, onslide={<11>safe}] (0) {$l$};
-      \node[main node, onslide={<3-5>inspect}, onslide={<6->safe}] (1) [above left of=0] {$l$};
-      \node[main node, onslide={<7-9>inspect}, onslide={<10->safe}] (2) [below left of=0] {$l$};
+      \node[main node,
+        onslide={<2->inspect}, onslide={<2>changed},
+        onslide={<11>safe}, onslide={<11>changed}
+      ] (0) {$l$};
+      \node[main node,
+        onslide={<3-5>inspect}, onslide={<3>changed},
+        onslide={<6->safe}, onslide={<6>changed}
+      ] (1) [above left of=0] {$l$};
+      \node[main node,
+        onslide={<7-9>inspect}, onslide={<7>changed},
+        onslide={<10->safe}, onslide={<10>changed}
+      ] (2) [below left of=0] {$l$};
       
       \node (11) [left of=1] {};
       \node (21) [left of=2] {};
       \node (exit) [right of=0] {};
 
       \path[every node/.style={font=\sffamily\small}]
-        (1) edge[onslide={<3-5>inspect}, onslide={<6->safe}] node {} (0)
-        (2) edge[onslide={<7-9>inspect}, onslide={<10->safe}] node {} (0)
-        (11) edge[onslide={<4>inspect}, onslide={<5->safe}] node {} (1)
-        (21) edge[onslide={<8>inspect}, onslide={<9->safe}] node {} (2)
-        (0) edge[onslide={<2-10>inspect}, onslide={<11>safe}] node {} (exit);
+      (1) edge[
+        onslide={<3-5>inspect}, onslide={<3>changed},
+        onslide={<6->safe}, onslide={<6>changed}
+      ] node {} (0)
+      (2) edge[
+        onslide={<7-9>inspect}, onslide={<7>changed},
+        onslide={<10->safe}, onslide={<10>changed}
+      ] node {} (0)
+      (11) edge[
+        onslide={<4>inspect}, onslide={<4>changed},
+        onslide={<5->safe}, onslide={<5>changed}
+      ] node {} (1)
+      (21) edge[
+        onslide={<8>inspect}, onslide={<8>changed},
+        onslide={<9->safe}, onslide={<9>changed}
+      ] node {} (2)
+      (0) edge[
+        onslide={<2-10>inspect}, onslide={<2>changed},
+        onslide={<11>safe}, onslide={<11>changed}
+      ] node {} (exit);
     \end{tikzpicture}
   \end{figure}
 \end{frame}
