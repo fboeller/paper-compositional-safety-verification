@@ -1,5 +1,4 @@
 *~
-*.pdf
 *.log
 *.out
 *.aux
@@ -10,4 +9,3 @@
 *.blg
 *.dvi
 VeryMax
-template.tex
